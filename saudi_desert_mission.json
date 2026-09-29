@@ -1,0 +1,315 @@
+{
+ "format": "python-gcs-mission-plan",
+ "version": 4,
+ "mission": {
+  "scenario_id": "SD-RHP-01",
+  "name": "Saudi Desert SAR - Missing Person Search",
+  "area": "FICTIONAL SAUDI DESERT TEST RANGE",
+  "source": "SAR-C2-SIM",
+  "simulation_time_scale": 3.0,
+  "description": "Reconstructed v4 fixture (radius 3333.33 m, subjects 101+204).",
+  "rally_subject_track_id": 101,
+  "rally_model": "RHP-FE-PF-PW-ARC + 100 KM/8 MIN SAR INGRESS",
+  "rally_eta_s": 145.0,
+  "rally_standoff_m": 0.0,
+  "ingress_performance": "100 KM / 8 MIN",
+  "ingress_speed_mps": 208.3333333333,
+  "search_speed_kph": 160.0,
+  "search_radius_m": 3333.3333333333,
+  "subject_lead_time_s": 300.0,
+  "visualization_min_rhp_updates_before_atr": 3,
+  "manual_route_hold_s": 50.0,
+  "actual_subject_offset_at_search_start_m": 3000.0,
+  "actual_subject_bearing_at_search_start_deg": 28.0,
+  "arc_search_pattern": {
+   "type": "RHP-FE-PF-PW-ARC",
+   "center": {
+    "latitude": 23.743784095611126,
+    "longitude": 47.328064915102644
+   },
+   "altitude_m": 600.0,
+   "sector_width_deg": 60.0,
+   "sample_step_deg": 10.0,
+   "candidate_radial_spacing_m": 152.0490627116,
+   "decision_interval_s": 25.0,
+   "belief_update_interval_s": 1.0,
+   "candidate_evaluation_interval_s": 25.0,
+   "particle_count": 3000,
+   "encounter_sample_count": 64,
+   "radial_shortlist_count": 5,
+   "motion_model": "isotropic",
+   "particle_filter_configuration": "optimized-stratified-segment",
+   "swarm_coordination": true,
+   "vehicle_arc_sequences": {
+    "1": [
+     {
+      "radius_m": 2204.7,
+      "start_boundary": "MAX"
+     },
+     {
+      "radius_m": 2660.9,
+      "start_boundary": "MIN"
+     },
+     {
+      "radius_m": 1900.6,
+      "start_boundary": "MAX"
+     },
+     {
+      "radius_m": 2965.0,
+      "start_boundary": "MIN"
+     },
+     {
+      "radius_m": 2356.8,
+      "start_boundary": "MAX"
+     }
+    ],
+    "2": [
+     {
+      "radius_m": 2052.7,
+      "start_boundary": "MIN"
+     },
+     {
+      "radius_m": 2508.8,
+      "start_boundary": "MAX"
+     },
+     {
+      "radius_m": 1748.6,
+      "start_boundary": "MIN"
+     },
+     {
+      "radius_m": 2812.9,
+      "start_boundary": "MAX"
+     },
+     {
+      "radius_m": 3269.1,
+      "start_boundary": "MIN"
+     }
+    ],
+    "3": [
+     {
+      "radius_m": 2356.8,
+      "start_boundary": "MAX"
+     },
+     {
+      "radius_m": 1900.6,
+      "start_boundary": "MIN"
+     },
+     {
+      "radius_m": 2660.9,
+      "start_boundary": "MAX"
+     },
+     {
+      "radius_m": 1596.5,
+      "start_boundary": "MIN"
+     },
+     {
+      "radius_m": 3117.0,
+      "start_boundary": "MAX"
+     }
+    ],
+    "4": [
+     {
+      "radius_m": 2508.8,
+      "start_boundary": "MAX"
+     },
+     {
+      "radius_m": 2052.7,
+      "start_boundary": "MIN"
+     },
+     {
+      "radius_m": 2965.0,
+      "start_boundary": "MIN"
+     },
+     {
+      "radius_m": 1748.6,
+      "start_boundary": "MAX"
+     },
+     {
+      "radius_m": 2812.9,
+      "start_boundary": "MIN"
+     }
+    ],
+    "5": [
+     {
+      "radius_m": 2660.9,
+      "start_boundary": "MIN"
+     },
+     {
+      "radius_m": 2204.7,
+      "start_boundary": "MAX"
+     },
+     {
+      "radius_m": 3117.0,
+      "start_boundary": "MIN"
+     },
+     {
+      "radius_m": 1900.6,
+      "start_boundary": "MAX"
+     },
+     {
+      "radius_m": 2508.8,
+      "start_boundary": "MIN"
+     }
+    ],
+    "6": [
+     {
+      "radius_m": 2812.9,
+      "start_boundary": "MAX"
+     },
+     {
+      "radius_m": 2356.8,
+      "start_boundary": "MIN"
+     },
+     {
+      "radius_m": 3269.1,
+      "start_boundary": "MAX"
+     },
+     {
+      "radius_m": 2052.7,
+      "start_boundary": "MIN"
+     },
+     {
+      "radius_m": 2965.0,
+      "start_boundary": "MAX"
+     }
+    ]
+   }
+  },
+  "rally_predicted_subject": {
+   "latitude": 23.743784095611126,
+   "longitude": 47.328064915102644
+  },
+  "flight_altitude_msl_m": 1130.0,
+  "subject_max_speed_kph": 40.0
+ },
+ "active_vehicle_id": 1,
+ "sites": [
+  {
+   "latitude": 23.64354607397629,
+   "longitude": 47.03489051043213,
+   "altitude_m": 250.0,
+   "code": "GCS",
+   "label": "Ground Control Station"
+  },
+  {
+   "latitude": 23.66400328536482,
+   "longitude": 47.041173923858594,
+   "altitude_m": 270.0,
+   "code": "RDR",
+   "label": "Radar"
+  },
+  {
+   "latitude": 23.65,
+   "longitude": 47.05,
+   "altitude_m": 245.0,
+   "code": "LC",
+   "label": "Launcher"
+  }
+ ],
+ "vehicle_routes": [
+  {
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01",
+   "waypoints": []
+  },
+  {
+   "vehicle_id": 2,
+   "vehicle_code": "SAR-02",
+   "waypoints": []
+  },
+  {
+   "vehicle_id": 3,
+   "vehicle_code": "SAR-03",
+   "waypoints": []
+  },
+  {
+   "vehicle_id": 4,
+   "vehicle_code": "SAR-04",
+   "waypoints": []
+  },
+  {
+   "vehicle_id": 5,
+   "vehicle_code": "SAR-05",
+   "waypoints": []
+  },
+  {
+   "vehicle_id": 6,
+   "vehicle_code": "SAR-06",
+   "waypoints": []
+  }
+ ],
+ "zones": [
+  {
+   "code": "SAFE01",
+   "label": "Saudi Desert Safe Zone",
+   "zone_type": "SAFE",
+   "vertices": [
+    {
+     "latitude": 23.625362552217755,
+     "longitude": 47.00839347806096,
+     "altitude_m": 0.0
+    },
+    {
+     "latitude": 23.605150550780458,
+     "longitude": 47.02112911454803,
+     "altitude_m": 0.0
+    },
+    {
+     "latitude": 23.605150550780458,
+     "longitude": 46.99565784157389,
+     "altitude_m": 0.0
+    }
+   ]
+  }
+ ],
+ "initial_subjects": [
+  {
+   "track_id": 101,
+   "subject_type": "MISSING_PERSON_CHILD",
+   "latitude": 23.767578946299025,
+   "longitude": 47.34188681396008,
+   "altitude_m": 0.0,
+   "country": "--",
+   "platform_name": "MISSING CHILD",
+   "speed_kph": 12.0,
+   "heading_deg": 118.0,
+   "position_uncertainty_m": 500.0,
+   "source": "SAR-C2",
+   "motion_profile": [
+    {
+     "start_s": 0.0,
+     "mode": "ORBIT",
+     "speed_kph": 12.0,
+     "center_latitude": 23.743784095611126,
+     "center_longitude": 47.328064915102644,
+     "radius_m": 3000.0,
+     "clockwise": true
+    }
+   ]
+  },
+  {
+   "track_id": 204,
+   "subject_type": "MISSING_PERSON_ADULT",
+   "latitude": 23.72224051484353,
+   "longitude": 47.38631796862842,
+   "altitude_m": 0.0,
+   "country": "--",
+   "platform_name": "MISSING ADULT",
+   "speed_kph": 18.0,
+   "heading_deg": 202.0,
+   "position_uncertainty_m": 500.0,
+   "source": "SAR-C2",
+   "motion_profile": [
+    {
+     "start_s": 0.0,
+     "mode": "ORBIT",
+     "speed_kph": 18.0,
+     "center_latitude": 23.743784095611126,
+     "center_longitude": 47.328064915102644,
+     "radius_m": 6402.0,
+     "clockwise": true
+    }
+   ]
+  }
+ ]
+}

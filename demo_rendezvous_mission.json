@@ -1,0 +1,425 @@
+{
+  "format": "python-gcs-mission-plan",
+  "version": 4,
+  "mission": {
+    "scenario_id": "DEMO-RDV-01",
+    "name": "Local rendezvous demonstration mission",
+    "source": "LOCAL"
+  },
+  "active_vehicle_id": 1,
+  "active_vehicle_code": "SAR-01",
+  "sites": [
+    {
+      "latitude": 37.3422,
+      "longitude": 127.9202,
+      "altitude_m": 42,
+      "code": "GCS",
+      "label": "Ground Control Station"
+    },
+    {
+      "latitude": 37.3452,
+      "longitude": 127.9157,
+      "altitude_m": 68,
+      "code": "RDR",
+      "label": "Radar"
+    },
+    {
+      "latitude": 37.3399,
+      "longitude": 127.91669999999999,
+      "altitude_m": 51,
+      "code": "LC",
+      "label": "Launcher"
+    }
+  ],
+  "waypoints": [
+    {
+      "latitude": 37.368069725997394,
+      "longitude": 128.25380660488688,
+      "altitude_m": 600.0,
+      "code": "WP001",
+      "label": "SAR-01 Waypoint 1",
+      "point_type": "WAYPOINT",
+      "sequence": 1,
+      "vehicle_id": 1,
+      "vehicle_code": "SAR-01"
+    },
+    {
+      "latitude": 37.403865439187896,
+      "longitude": 128.25774709857882,
+      "altitude_m": 600.0,
+      "code": "WP002",
+      "label": "SAR-01 Waypoint 2",
+      "point_type": "WAYPOINT",
+      "sequence": 2,
+      "vehicle_id": 1,
+      "vehicle_code": "SAR-01"
+    },
+    {
+      "latitude": 37.439661152378406,
+      "longitude": 128.24592561750302,
+      "altitude_m": 600.0,
+      "code": "WP003",
+      "label": "SAR-01 Waypoint 3",
+      "point_type": "WAYPOINT",
+      "sequence": 3,
+      "vehicle_id": 1,
+      "vehicle_code": "SAR-01"
+    },
+    {
+      "latitude": 37.47545686556891,
+      "longitude": 128.26562808596267,
+      "altitude_m": 600.0,
+      "code": "WP004",
+      "label": "SAR-01 Waypoint 4",
+      "point_type": "WAYPOINT",
+      "sequence": 4,
+      "vehicle_id": 1,
+      "vehicle_code": "SAR-01"
+    },
+    {
+      "latitude": 37.507307958121004,
+      "longitude": 128.25380660488688,
+      "altitude_m": 600.0,
+      "code": "WP005",
+      "label": "SAR-01 Waypoint 5",
+      "point_type": "WAYPOINT",
+      "sequence": 5,
+      "vehicle_id": 1,
+      "vehicle_code": "SAR-01"
+    }
+  ],
+  "vehicle_routes": [
+    {
+      "vehicle_id": 1,
+      "vehicle_code": "SAR-01",
+      "waypoints": [
+        {
+          "latitude": 37.368069725997394,
+          "longitude": 128.25380660488688,
+          "altitude_m": 600.0,
+          "code": "WP001",
+          "label": "SAR-01 Waypoint 1",
+          "point_type": "WAYPOINT",
+          "sequence": 1
+        },
+        {
+          "latitude": 37.403865439187896,
+          "longitude": 128.25774709857882,
+          "altitude_m": 600.0,
+          "code": "WP002",
+          "label": "SAR-01 Waypoint 2",
+          "point_type": "WAYPOINT",
+          "sequence": 2
+        },
+        {
+          "latitude": 37.439661152378406,
+          "longitude": 128.24592561750302,
+          "altitude_m": 600.0,
+          "code": "WP003",
+          "label": "SAR-01 Waypoint 3",
+          "point_type": "WAYPOINT",
+          "sequence": 3
+        },
+        {
+          "latitude": 37.47545686556891,
+          "longitude": 128.26562808596267,
+          "altitude_m": 600.0,
+          "code": "WP004",
+          "label": "SAR-01 Waypoint 4",
+          "point_type": "WAYPOINT",
+          "sequence": 4
+        },
+        {
+          "latitude": 37.507307958121004,
+          "longitude": 128.25380660488688,
+          "altitude_m": 600.0,
+          "code": "WP005",
+          "label": "SAR-01 Waypoint 5",
+          "point_type": "WAYPOINT",
+          "sequence": 5
+        }
+      ]
+    },
+    {
+      "vehicle_id": 2,
+      "vehicle_code": "SAR-02",
+      "waypoints": [
+        {
+          "latitude": 37.368069725997394,
+          "longitude": 128.25380660488688,
+          "altitude_m": 600.0,
+          "code": "WP001",
+          "label": "SAR-02 Waypoint 1",
+          "point_type": "WAYPOINT",
+          "sequence": 1
+        },
+        {
+          "latitude": 37.38325543428847,
+          "longitude": 128.2947826783524,
+          "altitude_m": 600.0,
+          "code": "WP002",
+          "label": "SAR-02 Waypoint 2",
+          "point_type": "WAYPOINT",
+          "sequence": 2
+        },
+        {
+          "latitude": 37.40928973579625,
+          "longitude": 128.32787776443402,
+          "altitude_m": 600.0,
+          "code": "WP003",
+          "label": "SAR-02 Waypoint 3",
+          "point_type": "WAYPOINT",
+          "sequence": 3
+        },
+        {
+          "latitude": 37.41362685087063,
+          "longitude": 128.37673482528342,
+          "altitude_m": 600.0,
+          "code": "WP004",
+          "label": "SAR-02 Waypoint 4",
+          "point_type": "WAYPOINT",
+          "sequence": 4
+        },
+        {
+          "latitude": 37.437688842059195,
+          "longitude": 128.40553154223122,
+          "altitude_m": 600.0,
+          "code": "WP005",
+          "label": "SAR-02 Waypoint 5",
+          "point_type": "WAYPOINT",
+          "sequence": 5
+        }
+      ]
+    },
+    {
+      "vehicle_id": 3,
+      "vehicle_code": "SAR-03",
+      "waypoints": [
+        {
+          "latitude": 37.368069725997394,
+          "longitude": 128.25380660488688,
+          "altitude_m": 600.0,
+          "code": "WP001",
+          "label": "SAR-03 Waypoint 1",
+          "point_type": "WAYPOINT",
+          "sequence": 1
+        },
+        {
+          "latitude": 37.34745972109797,
+          "longitude": 128.29084218466045,
+          "altitude_m": 600.0,
+          "code": "WP002",
+          "label": "SAR-03 Waypoint 2",
+          "point_type": "WAYPOINT",
+          "sequence": 2
+        },
+        {
+          "latitude": 37.33769830941524,
+          "longitude": 128.3357587518179,
+          "altitude_m": 600.0,
+          "code": "WP003",
+          "label": "SAR-03 Waypoint 3",
+          "point_type": "WAYPOINT",
+          "sequence": 3
+        },
+        {
+          "latitude": 37.30623971129911,
+          "longitude": 128.36491334420762,
+          "altitude_m": 600.0,
+          "code": "WP004",
+          "label": "SAR-03 Waypoint 4",
+          "point_type": "WAYPOINT",
+          "sequence": 4
+        },
+        {
+          "latitude": 37.29845060993559,
+          "longitude": 128.40553154223122,
+          "altitude_m": 600.0,
+          "code": "WP005",
+          "label": "SAR-03 Waypoint 5",
+          "point_type": "WAYPOINT",
+          "sequence": 5
+        }
+      ]
+    },
+    {
+      "vehicle_id": 4,
+      "vehicle_code": "SAR-04",
+      "waypoints": [
+        {
+          "latitude": 37.368069725997394,
+          "longitude": 128.25380660488688,
+          "altitude_m": 600.0,
+          "code": "WP001",
+          "label": "SAR-04 Waypoint 1",
+          "point_type": "WAYPOINT",
+          "sequence": 1
+        },
+        {
+          "latitude": 37.33227401280689,
+          "longitude": 128.24986611119493,
+          "altitude_m": 600.0,
+          "code": "WP002",
+          "label": "SAR-04 Waypoint 2",
+          "point_type": "WAYPOINT",
+          "sequence": 2
+        },
+        {
+          "latitude": 37.29647829961638,
+          "longitude": 128.26168759227073,
+          "altitude_m": 600.0,
+          "code": "WP003",
+          "label": "SAR-04 Waypoint 3",
+          "point_type": "WAYPOINT",
+          "sequence": 3
+        },
+        {
+          "latitude": 37.26068258642588,
+          "longitude": 128.24198512381108,
+          "altitude_m": 600.0,
+          "code": "WP004",
+          "label": "SAR-04 Waypoint 4",
+          "point_type": "WAYPOINT",
+          "sequence": 4
+        },
+        {
+          "latitude": 37.228831493873784,
+          "longitude": 128.25380660488688,
+          "altitude_m": 600.0,
+          "code": "WP005",
+          "label": "SAR-04 Waypoint 5",
+          "point_type": "WAYPOINT",
+          "sequence": 5
+        }
+      ]
+    },
+    {
+      "vehicle_id": 5,
+      "vehicle_code": "SAR-05",
+      "waypoints": [
+        {
+          "latitude": 37.368069725997394,
+          "longitude": 128.25380660488688,
+          "altitude_m": 600.0,
+          "code": "WP001",
+          "label": "SAR-05 Waypoint 1",
+          "point_type": "WAYPOINT",
+          "sequence": 1
+        },
+        {
+          "latitude": 37.352884017706316,
+          "longitude": 128.21283053142136,
+          "altitude_m": 600.0,
+          "code": "WP002",
+          "label": "SAR-05 Waypoint 2",
+          "point_type": "WAYPOINT",
+          "sequence": 2
+        },
+        {
+          "latitude": 37.32684971619854,
+          "longitude": 128.17973544533973,
+          "altitude_m": 600.0,
+          "code": "WP003",
+          "label": "SAR-05 Waypoint 3",
+          "point_type": "WAYPOINT",
+          "sequence": 3
+        },
+        {
+          "latitude": 37.32251260112416,
+          "longitude": 128.13087838449033,
+          "altitude_m": 600.0,
+          "code": "WP004",
+          "label": "SAR-05 Waypoint 4",
+          "point_type": "WAYPOINT",
+          "sequence": 4
+        },
+        {
+          "latitude": 37.29845060993559,
+          "longitude": 128.10208166754254,
+          "altitude_m": 600.0,
+          "code": "WP005",
+          "label": "SAR-05 Waypoint 5",
+          "point_type": "WAYPOINT",
+          "sequence": 5
+        }
+      ]
+    },
+    {
+      "vehicle_id": 6,
+      "vehicle_code": "SAR-06",
+      "waypoints": [
+        {
+          "latitude": 37.368069725997394,
+          "longitude": 128.25380660488688,
+          "altitude_m": 600.0,
+          "code": "WP001",
+          "label": "SAR-06 Waypoint 1",
+          "point_type": "WAYPOINT",
+          "sequence": 1
+        },
+        {
+          "latitude": 37.38867973089682,
+          "longitude": 128.2167710251133,
+          "altitude_m": 600.0,
+          "code": "WP002",
+          "label": "SAR-06 Waypoint 2",
+          "point_type": "WAYPOINT",
+          "sequence": 2
+        },
+        {
+          "latitude": 37.39844114257955,
+          "longitude": 128.17185445795585,
+          "altitude_m": 600.0,
+          "code": "WP003",
+          "label": "SAR-06 Waypoint 3",
+          "point_type": "WAYPOINT",
+          "sequence": 3
+        },
+        {
+          "latitude": 37.429899740695674,
+          "longitude": 128.14269986556613,
+          "altitude_m": 600.0,
+          "code": "WP004",
+          "label": "SAR-06 Waypoint 4",
+          "point_type": "WAYPOINT",
+          "sequence": 4
+        },
+        {
+          "latitude": 37.437688842059195,
+          "longitude": 128.10208166754254,
+          "altitude_m": 600.0,
+          "code": "WP005",
+          "label": "SAR-06 Waypoint 5",
+          "point_type": "WAYPOINT",
+          "sequence": 5
+        }
+      ]
+    }
+  ],
+  "return_point": null,
+  "zones": [
+    {
+      "code": "SAFE01",
+      "label": "Safe Zone 1",
+      "zone_type": "SAFE",
+      "vertices": [
+        {
+          "latitude": 37.316153348294954,
+          "longitude": 127.85961055627743,
+          "altitude_m": 0.0
+        },
+        {
+          "latitude": 37.29459388009517,
+          "longitude": 127.8752586699221,
+          "altitude_m": 0.0
+        },
+        {
+          "latitude": 37.29459388009517,
+          "longitude": 127.84396244263276,
+          "altitude_m": 0.0
+        }
+      ]
+    }
+  ],
+  "initial_subjects": []
+}

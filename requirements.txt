@@ -1,0 +1,22 @@
+# Qt 3D PLAN milestone.
+PySide6==6.11.1
+openpyxl>=3.1,<4
+numpy>=1.26,<3
+
+# Stone-SPX certified search planning (vendored cpp_search/).
+# SPX integer master uses scipy.optimize.milp (HiGHS).
+scipy>=1.11,<2
+
+# Optional SPX backends (persistent master / exact-survival MILP).
+# 없어도 scipy.optimize.milp 로 동작한다.
+# highspy>=1.7
+# pyscipopt>=5.0
+
+# Terrain baking (offline tool tools/bake_terrain_from_mission.py only;
+# GCS runtime 은 numpy 로 baked NPZ 만 읽는다).
+# rasterio>=1.3
+
+# The legacy Tkinter UI remains available through main.py.
+# Planned integrations:
+# pymavlink>=2.4
+# pyserial>=3.5

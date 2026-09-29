@@ -1,0 +1,2323 @@
+{
+ "format": "python-gcs-mission-plan",
+ "version": 4,
+ "mission": {
+  "scenario_id": "CM-SEQ-2",
+  "name": "Sequential Multi-Zone SAR - Inside then Outside Circle",
+  "area": "POLISH BESKID SADECKI BASIN (CARPATHIAN) TEST RANGE",
+  "source": "SAR-C2-SIM",
+  "simulation_time_scale": 3.0,
+  "description": "Find subject #1 inside the search circle, then re-center and travel outside the circle to find subject #2.",
+  "rally_subject_track_id": 101,
+  "rally_model": "RHP-FE-PF-PW-ARC + CONTINUOUS_MOVE (100 KM/8 MIN SAR INGRESS)",
+  "rally_eta_s": 145.0,
+  "rally_standoff_m": 0.0,
+  "ingress_performance": "100 KM / 8 MIN",
+  "ingress_speed_mps": 208.3333333333,
+  "search_speed_kph": 160.0,
+  "search_radius_m": 8900.0,
+  "subject_lead_time_s": 300.0,
+  "visualization_min_rhp_updates_before_atr": 3,
+  "manual_route_hold_s": 50.0,
+  "sector_assignment": "COORDINATED MARGINAL-UNION RHP ACTION SELECTION / 6 SAR",
+  "actual_subject_offset_at_search_start_m": 2814.4,
+  "actual_subject_bearing_at_search_start_deg": 288.4,
+  "arc_search_pattern": {
+   "type": "RHP-FE-PF-PW-ARC",
+   "center": {
+    "latitude": 49.52,
+    "longitude": 20.59
+   },
+   "altitude_m": 600.0,
+   "sector_width_deg": 60.0,
+   "sample_step_deg": 10.0,
+   "candidate_radial_spacing_m": 152.0490627116,
+   "decision_interval_s": 25.0,
+   "belief_update_interval_s": 1.0,
+   "candidate_evaluation_interval_s": 25.0,
+   "particle_count": 3000,
+   "encounter_sample_count": 64,
+   "radial_shortlist_count": 5,
+   "motion_model": "isotropic",
+   "particle_filter_configuration": "optimized-stratified-segment",
+   "swarm_coordination": true,
+   "description": "CPP RHP future-encounter PF probability-weighted concentric ARC action prefix with marginal-union swarm assignment and deconflicted radii; 25 s prefix only, connector legs sensor-off",
+   "note": "arc sequences removed; routes are the baked SPX plan"
+  },
+  "rally_predicted_subject": {
+   "latitude": 49.52,
+   "longitude": 20.59
+  },
+  "flight_altitude_msl_m": 1000.0,
+  "flight_altitude_note": "Relocated to Polish Beskid Sadecki basin. Basin-search MSL 1000 m: flat basin flyable, southern moderate mountains no-fly.",
+  "terrain_reference": {
+   "dem": "Copernicus GLO-30 N49E020 (Beskid Sadecki)",
+   "aoi_center_latlon": [
+    49.52,
+    20.59
+   ],
+   "elevation_range_m_msl": [
+    287,
+    1268
+   ],
+   "note": "real basin terrain; terrain/beskid_basin.npz"
+  },
+  "subject_max_speed_kph": 40.0,
+  "planning_motion_profile": "CONTINUOUS_MOVE",
+  "spx_certified": {
+   "method": "stone-spx",
+   "certified": false,
+   "detection_probability": 0.4998,
+   "relative_optimality_gap": 0.0593,
+   "iterations": 3,
+   "grid_shape": [
+    10,
+    10
+   ],
+   "no_fly_cell_count": 10,
+   "runtime_s": 177.4,
+   "planning_motion_profile": "CONTINUOUS_MOVE",
+   "per_target_pd": [
+    [
+     "MissingPerson-child-nominal/CONTINUOUS_MOVE",
+     0.5006
+    ],
+    [
+     "MissingPerson-adult-nominal/CONTINUOUS_MOVE",
+     0.4998
+    ]
+   ]
+  },
+  "planning_mode": "RHP-SPX",
+  "rescue_group_size": 3,
+  "search_prior_sigma_ratio": 0.35,
+  "spx_assignments": [
+   [
+    54,
+    64,
+    74,
+    64,
+    64,
+    74,
+    64,
+    54,
+    44,
+    44,
+    54,
+    44
+   ],
+   [
+    63,
+    53,
+    54,
+    54,
+    54,
+    64,
+    63,
+    62,
+    52,
+    62,
+    63,
+    53
+   ],
+   [
+    53,
+    54,
+    44,
+    44,
+    43,
+    53,
+    52,
+    52,
+    53,
+    63,
+    64,
+    74
+   ],
+   [
+    44,
+    44,
+    43,
+    53,
+    63,
+    63,
+    53,
+    43,
+    43,
+    33,
+    23,
+    23
+   ],
+   [
+    43,
+    43,
+    53,
+    63,
+    73,
+    73,
+    73,
+    63,
+    64,
+    74,
+    73,
+    73
+   ],
+   [
+    34,
+    34,
+    34,
+    33,
+    33,
+    43,
+    42,
+    42,
+    42,
+    52,
+    42,
+    43
+   ]
+  ],
+  "search_camera_gimbal_deg": 63.0,
+  "search_camera_detect_within_reach": true,
+  "exclude_ingress_side": true,
+  "second_predicted_subject": {
+   "latitude": 49.56266978081207,
+   "longitude": 20.703845058279732
+  },
+  "second_search_radius_m": 4000.0,
+  "ingress_sweep": true,
+  "initial_ring_ratio": 0.3,
+  "spx_terrain_npz": "terrain/beskid_roads.npz",
+  "spx_flight_msl_m": 1000.0,
+  "spx_clearance_agl_m": 120.0,
+  "rhp_complete_cell_sweep": true,
+  "search_camera_detect_reach_m": 320.0
+ },
+ "active_vehicle_id": 1,
+ "active_vehicle_code": "SAR-01",
+ "sites": [
+  {
+   "latitude": 49.535,
+   "longitude": 20.94,
+   "altitude_m": 250.0,
+   "code": "GCS",
+   "label": "Ground Control Station"
+  },
+  {
+   "latitude": 49.505,
+   "longitude": 20.94,
+   "altitude_m": 270.0,
+   "code": "RDR",
+   "label": "Radar"
+  },
+  {
+   "latitude": 49.52,
+   "longitude": 20.92,
+   "altitude_m": 245.0,
+   "code": "LC",
+   "label": "Launcher"
+  }
+ ],
+ "waypoints": [
+  {
+   "latitude": 49.542159165934294,
+   "longitude": 20.580294813386445,
+   "altitude_m": 600.0,
+   "code": "WP001",
+   "label": "SAR-01 SPX 1",
+   "point_type": "WAYPOINT",
+   "sequence": 1,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.527994969457424,
+   "longitude": 20.58211811802423,
+   "altitude_m": 600.0,
+   "code": "WP002",
+   "label": "SAR-01 SPX 2",
+   "point_type": "WAYPOINT",
+   "sequence": 2,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.52833966059517,
+   "longitude": 20.58264907980594,
+   "altitude_m": 600.0,
+   "code": "WP003",
+   "label": "SAR-01 SPX 3",
+   "point_type": "WAYPOINT",
+   "sequence": 3,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.527650278319676,
+   "longitude": 20.581587156242524,
+   "altitude_m": 600.0,
+   "code": "WP004",
+   "label": "SAR-01 SPX 4",
+   "point_type": "WAYPOINT",
+   "sequence": 4,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.543984908372266,
+   "longitude": 20.58211811802423,
+   "altitude_m": 600.0,
+   "code": "WP005",
+   "label": "SAR-01 SPX 5",
+   "point_type": "WAYPOINT",
+   "sequence": 5,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.5599748472871,
+   "longitude": 20.58211811802423,
+   "altitude_m": 600.0,
+   "code": "WP006",
+   "label": "SAR-01 SPX 6",
+   "point_type": "WAYPOINT",
+   "sequence": 6,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.543984908372266,
+   "longitude": 20.58211811802423,
+   "altitude_m": 600.0,
+   "code": "WP007",
+   "label": "SAR-01 SPX 7",
+   "point_type": "WAYPOINT",
+   "sequence": 7,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.546052938392066,
+   "longitude": 20.5846735702826,
+   "altitude_m": 600.0,
+   "code": "WP008",
+   "label": "SAR-01 SPX 8",
+   "point_type": "WAYPOINT",
+   "sequence": 8,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.54464395933859,
+   "longitude": 20.57816240176069,
+   "altitude_m": 600.0,
+   "code": "WP009",
+   "label": "SAR-01 SPX 9",
+   "point_type": "WAYPOINT",
+   "sequence": 9,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.54191687835246,
+   "longitude": 20.57956266576586,
+   "altitude_m": 600.0,
+   "code": "WP010",
+   "label": "SAR-01 SPX 10",
+   "point_type": "WAYPOINT",
+   "sequence": 10,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.54332585740593,
+   "longitude": 20.586073834287774,
+   "altitude_m": 600.0,
+   "code": "WP011",
+   "label": "SAR-01 SPX 11",
+   "point_type": "WAYPOINT",
+   "sequence": 11,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.5599748472871,
+   "longitude": 20.58211811802423,
+   "altitude_m": 600.0,
+   "code": "WP012",
+   "label": "SAR-01 SPX 12",
+   "point_type": "WAYPOINT",
+   "sequence": 12,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.543984908372266,
+   "longitude": 20.58211811802423,
+   "altitude_m": 600.0,
+   "code": "WP013",
+   "label": "SAR-01 SPX 13",
+   "point_type": "WAYPOINT",
+   "sequence": 13,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.527994969457424,
+   "longitude": 20.58211811802423,
+   "altitude_m": 600.0,
+   "code": "WP014",
+   "label": "SAR-01 SPX 14",
+   "point_type": "WAYPOINT",
+   "sequence": 14,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.51200503054258,
+   "longitude": 20.58211811802423,
+   "altitude_m": 600.0,
+   "code": "WP015",
+   "label": "SAR-01 SPX 15",
+   "point_type": "WAYPOINT",
+   "sequence": 15,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.51256399393628,
+   "longitude": 20.578126006035234,
+   "altitude_m": 600.0,
+   "code": "WP016",
+   "label": "SAR-01 SPX 16",
+   "point_type": "WAYPOINT",
+   "sequence": 16,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.50941342099384,
+   "longitude": 20.582979144511217,
+   "altitude_m": 600.0,
+   "code": "WP017",
+   "label": "SAR-01 SPX 17",
+   "point_type": "WAYPOINT",
+   "sequence": 17,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.51144606714888,
+   "longitude": 20.58611023001323,
+   "altitude_m": 600.0,
+   "code": "WP018",
+   "label": "SAR-01 SPX 18",
+   "point_type": "WAYPOINT",
+   "sequence": 18,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.51459664009133,
+   "longitude": 20.581257091537243,
+   "altitude_m": 600.0,
+   "code": "WP019",
+   "label": "SAR-01 SPX 19",
+   "point_type": "WAYPOINT",
+   "sequence": 19,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.527994969457424,
+   "longitude": 20.58211811802423,
+   "altitude_m": 600.0,
+   "code": "WP020",
+   "label": "SAR-01 SPX 20",
+   "point_type": "WAYPOINT",
+   "sequence": 20,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.528495589827386,
+   "longitude": 20.582889272993096,
+   "altitude_m": 600.0,
+   "code": "WP021",
+   "label": "SAR-01 SPX 21",
+   "point_type": "WAYPOINT",
+   "sequence": 21,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.527494349087455,
+   "longitude": 20.581346963055367,
+   "altitude_m": 600.0,
+   "code": "WP022",
+   "label": "SAR-01 SPX 22",
+   "point_type": "WAYPOINT",
+   "sequence": 22,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.51200503054258,
+   "longitude": 20.58211811802423,
+   "altitude_m": 600.0,
+   "code": "WP023",
+   "label": "SAR-01 SPX 23",
+   "point_type": "WAYPOINT",
+   "sequence": 23,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.512100602651344,
+   "longitude": 20.5819708988718,
+   "altitude_m": 600.0,
+   "code": "WP024",
+   "label": "SAR-01 SPX 24",
+   "point_type": "WAYPOINT",
+   "sequence": 24,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  },
+  {
+   "latitude": 49.51190945843382,
+   "longitude": 20.582265337176665,
+   "altitude_m": 600.0,
+   "code": "WP025",
+   "label": "SAR-01 SPX 25",
+   "point_type": "WAYPOINT",
+   "sequence": 25,
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01"
+  }
+ ],
+ "vehicle_routes": [
+  {
+   "vehicle_id": 1,
+   "vehicle_code": "SAR-01",
+   "waypoints": [
+    {
+     "latitude": 49.542159165934294,
+     "longitude": 20.580294813386445,
+     "altitude_m": 600.0,
+     "code": "WP001",
+     "label": "SAR-01 SPX 1",
+     "point_type": "WAYPOINT",
+     "sequence": 1
+    },
+    {
+     "latitude": 49.527994969457424,
+     "longitude": 20.58211811802423,
+     "altitude_m": 600.0,
+     "code": "WP002",
+     "label": "SAR-01 SPX 2",
+     "point_type": "WAYPOINT",
+     "sequence": 2
+    },
+    {
+     "latitude": 49.52833966059517,
+     "longitude": 20.58264907980594,
+     "altitude_m": 600.0,
+     "code": "WP003",
+     "label": "SAR-01 SPX 3",
+     "point_type": "WAYPOINT",
+     "sequence": 3
+    },
+    {
+     "latitude": 49.527650278319676,
+     "longitude": 20.581587156242524,
+     "altitude_m": 600.0,
+     "code": "WP004",
+     "label": "SAR-01 SPX 4",
+     "point_type": "WAYPOINT",
+     "sequence": 4
+    },
+    {
+     "latitude": 49.543984908372266,
+     "longitude": 20.58211811802423,
+     "altitude_m": 600.0,
+     "code": "WP005",
+     "label": "SAR-01 SPX 5",
+     "point_type": "WAYPOINT",
+     "sequence": 5
+    },
+    {
+     "latitude": 49.5599748472871,
+     "longitude": 20.58211811802423,
+     "altitude_m": 600.0,
+     "code": "WP006",
+     "label": "SAR-01 SPX 6",
+     "point_type": "WAYPOINT",
+     "sequence": 6
+    },
+    {
+     "latitude": 49.543984908372266,
+     "longitude": 20.58211811802423,
+     "altitude_m": 600.0,
+     "code": "WP007",
+     "label": "SAR-01 SPX 7",
+     "point_type": "WAYPOINT",
+     "sequence": 7
+    },
+    {
+     "latitude": 49.546052938392066,
+     "longitude": 20.5846735702826,
+     "altitude_m": 600.0,
+     "code": "WP008",
+     "label": "SAR-01 SPX 8",
+     "point_type": "WAYPOINT",
+     "sequence": 8
+    },
+    {
+     "latitude": 49.54464395933859,
+     "longitude": 20.57816240176069,
+     "altitude_m": 600.0,
+     "code": "WP009",
+     "label": "SAR-01 SPX 9",
+     "point_type": "WAYPOINT",
+     "sequence": 9
+    },
+    {
+     "latitude": 49.54191687835246,
+     "longitude": 20.57956266576586,
+     "altitude_m": 600.0,
+     "code": "WP010",
+     "label": "SAR-01 SPX 10",
+     "point_type": "WAYPOINT",
+     "sequence": 10
+    },
+    {
+     "latitude": 49.54332585740593,
+     "longitude": 20.586073834287774,
+     "altitude_m": 600.0,
+     "code": "WP011",
+     "label": "SAR-01 SPX 11",
+     "point_type": "WAYPOINT",
+     "sequence": 11
+    },
+    {
+     "latitude": 49.5599748472871,
+     "longitude": 20.58211811802423,
+     "altitude_m": 600.0,
+     "code": "WP012",
+     "label": "SAR-01 SPX 12",
+     "point_type": "WAYPOINT",
+     "sequence": 12
+    },
+    {
+     "latitude": 49.543984908372266,
+     "longitude": 20.58211811802423,
+     "altitude_m": 600.0,
+     "code": "WP013",
+     "label": "SAR-01 SPX 13",
+     "point_type": "WAYPOINT",
+     "sequence": 13
+    },
+    {
+     "latitude": 49.527994969457424,
+     "longitude": 20.58211811802423,
+     "altitude_m": 600.0,
+     "code": "WP014",
+     "label": "SAR-01 SPX 14",
+     "point_type": "WAYPOINT",
+     "sequence": 14
+    },
+    {
+     "latitude": 49.51200503054258,
+     "longitude": 20.58211811802423,
+     "altitude_m": 600.0,
+     "code": "WP015",
+     "label": "SAR-01 SPX 15",
+     "point_type": "WAYPOINT",
+     "sequence": 15
+    },
+    {
+     "latitude": 49.51256399393628,
+     "longitude": 20.578126006035234,
+     "altitude_m": 600.0,
+     "code": "WP016",
+     "label": "SAR-01 SPX 16",
+     "point_type": "WAYPOINT",
+     "sequence": 16
+    },
+    {
+     "latitude": 49.50941342099384,
+     "longitude": 20.582979144511217,
+     "altitude_m": 600.0,
+     "code": "WP017",
+     "label": "SAR-01 SPX 17",
+     "point_type": "WAYPOINT",
+     "sequence": 17
+    },
+    {
+     "latitude": 49.51144606714888,
+     "longitude": 20.58611023001323,
+     "altitude_m": 600.0,
+     "code": "WP018",
+     "label": "SAR-01 SPX 18",
+     "point_type": "WAYPOINT",
+     "sequence": 18
+    },
+    {
+     "latitude": 49.51459664009133,
+     "longitude": 20.581257091537243,
+     "altitude_m": 600.0,
+     "code": "WP019",
+     "label": "SAR-01 SPX 19",
+     "point_type": "WAYPOINT",
+     "sequence": 19
+    },
+    {
+     "latitude": 49.527994969457424,
+     "longitude": 20.58211811802423,
+     "altitude_m": 600.0,
+     "code": "WP020",
+     "label": "SAR-01 SPX 20",
+     "point_type": "WAYPOINT",
+     "sequence": 20
+    },
+    {
+     "latitude": 49.528495589827386,
+     "longitude": 20.582889272993096,
+     "altitude_m": 600.0,
+     "code": "WP021",
+     "label": "SAR-01 SPX 21",
+     "point_type": "WAYPOINT",
+     "sequence": 21
+    },
+    {
+     "latitude": 49.527494349087455,
+     "longitude": 20.581346963055367,
+     "altitude_m": 600.0,
+     "code": "WP022",
+     "label": "SAR-01 SPX 22",
+     "point_type": "WAYPOINT",
+     "sequence": 22
+    },
+    {
+     "latitude": 49.51200503054258,
+     "longitude": 20.58211811802423,
+     "altitude_m": 600.0,
+     "code": "WP023",
+     "label": "SAR-01 SPX 23",
+     "point_type": "WAYPOINT",
+     "sequence": 23
+    },
+    {
+     "latitude": 49.512100602651344,
+     "longitude": 20.5819708988718,
+     "altitude_m": 600.0,
+     "code": "WP024",
+     "label": "SAR-01 SPX 24",
+     "point_type": "WAYPOINT",
+     "sequence": 24
+    },
+    {
+     "latitude": 49.51190945843382,
+     "longitude": 20.582265337176665,
+     "altitude_m": 600.0,
+     "code": "WP025",
+     "label": "SAR-01 SPX 25",
+     "point_type": "WAYPOINT",
+     "sequence": 25
+    }
+   ]
+  },
+  {
+   "vehicle_id": 2,
+   "vehicle_code": "SAR-02",
+   "waypoints": [
+    {
+     "latitude": 49.53806953672668,
+     "longitude": 20.564122575831327,
+     "altitude_m": 600.0,
+     "code": "WP001",
+     "label": "SAR-02 SPX 1",
+     "point_type": "WAYPOINT",
+     "sequence": 1
+    },
+    {
+     "latitude": 49.5464774931672,
+     "longitude": 20.55527045754427,
+     "altitude_m": 600.0,
+     "code": "WP002",
+     "label": "SAR-02 SPX 2",
+     "point_type": "WAYPOINT",
+     "sequence": 2
+    },
+    {
+     "latitude": 49.54760405505644,
+     "longitude": 20.55700581201792,
+     "altitude_m": 600.0,
+     "code": "WP003",
+     "label": "SAR-02 SPX 3",
+     "point_type": "WAYPOINT",
+     "sequence": 3
+    },
+    {
+     "latitude": 49.545350931277966,
+     "longitude": 20.55353510307062,
+     "altitude_m": 600.0,
+     "code": "WP004",
+     "label": "SAR-02 SPX 4",
+     "point_type": "WAYPOINT",
+     "sequence": 4
+    },
+    {
+     "latitude": 49.53048755425236,
+     "longitude": 20.55527045754427,
+     "altitude_m": 600.0,
+     "code": "WP005",
+     "label": "SAR-02 SPX 5",
+     "point_type": "WAYPOINT",
+     "sequence": 5
+    },
+    {
+     "latitude": 49.530769739081066,
+     "longitude": 20.555415349925703,
+     "altitude_m": 600.0,
+     "code": "WP006",
+     "label": "SAR-02 SPX 6",
+     "point_type": "WAYPOINT",
+     "sequence": 6
+    },
+    {
+     "latitude": 49.530205369423655,
+     "longitude": 20.555125565162836,
+     "altitude_m": 600.0,
+     "code": "WP007",
+     "label": "SAR-02 SPX 7",
+     "point_type": "WAYPOINT",
+     "sequence": 7
+    },
+    {
+     "latitude": 49.53048755425236,
+     "longitude": 20.579901338718546,
+     "altitude_m": 600.0,
+     "code": "WP008",
+     "label": "SAR-02 SPX 8",
+     "point_type": "WAYPOINT",
+     "sequence": 8
+    },
+    {
+     "latitude": 49.533079163801105,
+     "longitude": 20.580762365205533,
+     "altitude_m": 600.0,
+     "code": "WP009",
+     "label": "SAR-02 SPX 9",
+     "point_type": "WAYPOINT",
+     "sequence": 9
+    },
+    {
+     "latitude": 49.52992859085866,
+     "longitude": 20.57590922672955,
+     "altitude_m": 600.0,
+     "code": "WP010",
+     "label": "SAR-02 SPX 10",
+     "point_type": "WAYPOINT",
+     "sequence": 10
+    },
+    {
+     "latitude": 49.527895944703616,
+     "longitude": 20.57904031223156,
+     "altitude_m": 600.0,
+     "code": "WP011",
+     "label": "SAR-02 SPX 11",
+     "point_type": "WAYPOINT",
+     "sequence": 11
+    },
+    {
+     "latitude": 49.53104651764606,
+     "longitude": 20.583893450707542,
+     "altitude_m": 600.0,
+     "code": "WP012",
+     "label": "SAR-02 SPX 12",
+     "point_type": "WAYPOINT",
+     "sequence": 12
+    },
+    {
+     "latitude": 49.53048755425236,
+     "longitude": 20.579901338718546,
+     "altitude_m": 600.0,
+     "code": "WP013",
+     "label": "SAR-02 SPX 13",
+     "point_type": "WAYPOINT",
+     "sequence": 13
+    },
+    {
+     "latitude": 49.53264608228154,
+     "longitude": 20.580095246994254,
+     "altitude_m": 600.0,
+     "code": "WP014",
+     "label": "SAR-02 SPX 14",
+     "point_type": "WAYPOINT",
+     "sequence": 14
+    },
+    {
+     "latitude": 49.530361672378234,
+     "longitude": 20.57657634494083,
+     "altitude_m": 600.0,
+     "code": "WP015",
+     "label": "SAR-02 SPX 15",
+     "point_type": "WAYPOINT",
+     "sequence": 15
+    },
+    {
+     "latitude": 49.52832902622319,
+     "longitude": 20.579707430442838,
+     "altitude_m": 600.0,
+     "code": "WP016",
+     "label": "SAR-02 SPX 16",
+     "point_type": "WAYPOINT",
+     "sequence": 16
+    },
+    {
+     "latitude": 49.53061343612649,
+     "longitude": 20.583226332496267,
+     "altitude_m": 600.0,
+     "code": "WP017",
+     "label": "SAR-02 SPX 17",
+     "point_type": "WAYPOINT",
+     "sequence": 17
+    },
+    {
+     "latitude": 49.5464774931672,
+     "longitude": 20.579901338718546,
+     "altitude_m": 600.0,
+     "code": "WP018",
+     "label": "SAR-02 SPX 18",
+     "point_type": "WAYPOINT",
+     "sequence": 18
+    },
+    {
+     "latitude": 49.5464774931672,
+     "longitude": 20.55527045754427,
+     "altitude_m": 600.0,
+     "code": "WP019",
+     "label": "SAR-02 SPX 19",
+     "point_type": "WAYPOINT",
+     "sequence": 19
+    },
+    {
+     "latitude": 49.5464774931672,
+     "longitude": 20.530639576369992,
+     "altitude_m": 600.0,
+     "code": "WP020",
+     "label": "SAR-02 SPX 20",
+     "point_type": "WAYPOINT",
+     "sequence": 20
+    },
+    {
+     "latitude": 49.53048755425236,
+     "longitude": 20.530639576369992,
+     "altitude_m": 600.0,
+     "code": "WP021",
+     "label": "SAR-02 SPX 21",
+     "point_type": "WAYPOINT",
+     "sequence": 21
+    },
+    {
+     "latitude": 49.5464774931672,
+     "longitude": 20.530639576369992,
+     "altitude_m": 600.0,
+     "code": "WP022",
+     "label": "SAR-02 SPX 22",
+     "point_type": "WAYPOINT",
+     "sequence": 22
+    },
+    {
+     "latitude": 49.5464774931672,
+     "longitude": 20.55527045754427,
+     "altitude_m": 600.0,
+     "code": "WP023",
+     "label": "SAR-02 SPX 23",
+     "point_type": "WAYPOINT",
+     "sequence": 23
+    },
+    {
+     "latitude": 49.53048755425236,
+     "longitude": 20.55527045754427,
+     "altitude_m": 600.0,
+     "code": "WP024",
+     "label": "SAR-02 SPX 24",
+     "point_type": "WAYPOINT",
+     "sequence": 24
+    }
+   ]
+  },
+  {
+   "vehicle_id": 3,
+   "vehicle_code": "SAR-03",
+   "waypoints": [
+    {
+     "latitude": 49.52809175045695,
+     "longitude": 20.55185772874418,
+     "altitude_m": 600.0,
+     "code": "WP001",
+     "label": "SAR-03 SPX 1",
+     "point_type": "WAYPOINT",
+     "sequence": 1
+    },
+    {
+     "latitude": 49.53048755425236,
+     "longitude": 20.5508368989329,
+     "altitude_m": 600.0,
+     "code": "WP002",
+     "label": "SAR-03 SPX 2",
+     "point_type": "WAYPOINT",
+     "sequence": 2
+    },
+    {
+     "latitude": 49.532499817969935,
+     "longitude": 20.549536355064863,
+     "altitude_m": 600.0,
+     "code": "WP003",
+     "label": "SAR-03 SPX 3",
+     "point_type": "WAYPOINT",
+     "sequence": 3
+    },
+    {
+     "latitude": 49.529384317530166,
+     "longitude": 20.54793665078542,
+     "altitude_m": 600.0,
+     "code": "WP004",
+     "label": "SAR-03 SPX 4",
+     "point_type": "WAYPOINT",
+     "sequence": 4
+    },
+    {
+     "latitude": 49.52847529053479,
+     "longitude": 20.552137442800937,
+     "altitude_m": 600.0,
+     "code": "WP005",
+     "label": "SAR-03 SPX 5",
+     "point_type": "WAYPOINT",
+     "sequence": 5
+    },
+    {
+     "latitude": 49.531590790974555,
+     "longitude": 20.55373714708038,
+     "altitude_m": 600.0,
+     "code": "WP006",
+     "label": "SAR-03 SPX 6",
+     "point_type": "WAYPOINT",
+     "sequence": 6
+    },
+    {
+     "latitude": 49.53048755425236,
+     "longitude": 20.575467780107175,
+     "altitude_m": 600.0,
+     "code": "WP007",
+     "label": "SAR-03 SPX 7",
+     "point_type": "WAYPOINT",
+     "sequence": 7
+    },
+    {
+     "latitude": 49.53084453725315,
+     "longitude": 20.576017676258786,
+     "altitude_m": 600.0,
+     "code": "WP008",
+     "label": "SAR-03 SPX 8",
+     "point_type": "WAYPOINT",
+     "sequence": 8
+    },
+    {
+     "latitude": 49.53013057125157,
+     "longitude": 20.574917883955568,
+     "altitude_m": 600.0,
+     "code": "WP009",
+     "label": "SAR-03 SPX 9",
+     "point_type": "WAYPOINT",
+     "sequence": 9
+    },
+    {
+     "latitude": 49.51449761533752,
+     "longitude": 20.575467780107175,
+     "altitude_m": 600.0,
+     "code": "WP010",
+     "label": "SAR-03 SPX 10",
+     "point_type": "WAYPOINT",
+     "sequence": 10
+    },
+    {
+     "latitude": 49.51456609434217,
+     "longitude": 20.575362295137193,
+     "altitude_m": 600.0,
+     "code": "WP011",
+     "label": "SAR-03 SPX 11",
+     "point_type": "WAYPOINT",
+     "sequence": 11
+    },
+    {
+     "latitude": 49.51442913633287,
+     "longitude": 20.57557326507716,
+     "altitude_m": 600.0,
+     "code": "WP012",
+     "label": "SAR-03 SPX 12",
+     "point_type": "WAYPOINT",
+     "sequence": 12
+    },
+    {
+     "latitude": 49.51449761533752,
+     "longitude": 20.575467780107175,
+     "altitude_m": 600.0,
+     "code": "WP013",
+     "label": "SAR-03 SPX 13",
+     "point_type": "WAYPOINT",
+     "sequence": 13
+    },
+    {
+     "latitude": 49.51504559849797,
+     "longitude": 20.571492582055246,
+     "altitude_m": 600.0,
+     "code": "WP014",
+     "label": "SAR-03 SPX 14",
+     "point_type": "WAYPOINT",
+     "sequence": 14
+    },
+    {
+     "latitude": 49.51191698602203,
+     "longitude": 20.5763118926571,
+     "altitude_m": 600.0,
+     "code": "WP015",
+     "label": "SAR-03 SPX 15",
+     "point_type": "WAYPOINT",
+     "sequence": 15
+    },
+    {
+     "latitude": 49.513949632177074,
+     "longitude": 20.579442978159108,
+     "altitude_m": 600.0,
+     "code": "WP016",
+     "label": "SAR-03 SPX 16",
+     "point_type": "WAYPOINT",
+     "sequence": 16
+    },
+    {
+     "latitude": 49.517078244653014,
+     "longitude": 20.574623667557255,
+     "altitude_m": 600.0,
+     "code": "WP017",
+     "label": "SAR-03 SPX 17",
+     "point_type": "WAYPOINT",
+     "sequence": 17
+    },
+    {
+     "latitude": 49.51449761533752,
+     "longitude": 20.5508368989329,
+     "altitude_m": 600.0,
+     "code": "WP018",
+     "label": "SAR-03 SPX 18",
+     "point_type": "WAYPOINT",
+     "sequence": 18
+    },
+    {
+     "latitude": 49.5145845238291,
+     "longitude": 20.550792274356983,
+     "altitude_m": 600.0,
+     "code": "WP019",
+     "label": "SAR-03 SPX 19",
+     "point_type": "WAYPOINT",
+     "sequence": 19
+    },
+    {
+     "latitude": 49.51441070684594,
+     "longitude": 20.550881523508817,
+     "altitude_m": 600.0,
+     "code": "WP020",
+     "label": "SAR-03 SPX 20",
+     "point_type": "WAYPOINT",
+     "sequence": 20
+    },
+    {
+     "latitude": 49.53048755425236,
+     "longitude": 20.5508368989329,
+     "altitude_m": 600.0,
+     "code": "WP021",
+     "label": "SAR-03 SPX 21",
+     "point_type": "WAYPOINT",
+     "sequence": 21
+    },
+    {
+     "latitude": 49.53048755425236,
+     "longitude": 20.526206017758625,
+     "altitude_m": 600.0,
+     "code": "WP022",
+     "label": "SAR-03 SPX 22",
+     "point_type": "WAYPOINT",
+     "sequence": 22
+    },
+    {
+     "latitude": 49.532953960844374,
+     "longitude": 20.524708009796903,
+     "altitude_m": 600.0,
+     "code": "WP023",
+     "label": "SAR-03 SPX 23",
+     "point_type": "WAYPOINT",
+     "sequence": 23
+    },
+    {
+     "latitude": 49.52858490227088,
+     "longitude": 20.523361991364435,
+     "altitude_m": 600.0,
+     "code": "WP024",
+     "label": "SAR-03 SPX 24",
+     "point_type": "WAYPOINT",
+     "sequence": 24
+    },
+    {
+     "latitude": 49.528021147660354,
+     "longitude": 20.527704025720343,
+     "altitude_m": 600.0,
+     "code": "WP025",
+     "label": "SAR-03 SPX 25",
+     "point_type": "WAYPOINT",
+     "sequence": 25
+    },
+    {
+     "latitude": 49.53239020623384,
+     "longitude": 20.52905004415281,
+     "altitude_m": 600.0,
+     "code": "WP026",
+     "label": "SAR-03 SPX 26",
+     "point_type": "WAYPOINT",
+     "sequence": 26
+    },
+    {
+     "latitude": 49.53048755425236,
+     "longitude": 20.5508368989329,
+     "altitude_m": 600.0,
+     "code": "WP027",
+     "label": "SAR-03 SPX 27",
+     "point_type": "WAYPOINT",
+     "sequence": 27
+    },
+    {
+     "latitude": 49.530935041710244,
+     "longitude": 20.55106666863289,
+     "altitude_m": 600.0,
+     "code": "WP028",
+     "label": "SAR-03 SPX 28",
+     "point_type": "WAYPOINT",
+     "sequence": 28
+    },
+    {
+     "latitude": 49.530040066794484,
+     "longitude": 20.550607129232908,
+     "altitude_m": 600.0,
+     "code": "WP029",
+     "label": "SAR-03 SPX 29",
+     "point_type": "WAYPOINT",
+     "sequence": 29
+    },
+    {
+     "latitude": 49.5464774931672,
+     "longitude": 20.5508368989329,
+     "altitude_m": 600.0,
+     "code": "WP030",
+     "label": "SAR-03 SPX 30",
+     "point_type": "WAYPOINT",
+     "sequence": 30
+    },
+    {
+     "latitude": 49.5464774931672,
+     "longitude": 20.575467780107175,
+     "altitude_m": 600.0,
+     "code": "WP031",
+     "label": "SAR-03 SPX 31",
+     "point_type": "WAYPOINT",
+     "sequence": 31
+    },
+    {
+     "latitude": 49.562467432082045,
+     "longitude": 20.575467780107175,
+     "altitude_m": 600.0,
+     "code": "WP032",
+     "label": "SAR-03 SPX 32",
+     "point_type": "WAYPOINT",
+     "sequence": 32
+    }
+   ]
+  },
+  {
+   "vehicle_id": 4,
+   "vehicle_code": "SAR-04",
+   "waypoints": [
+    {
+     "latitude": 49.51440083433799,
+     "longitude": 20.549640949438498,
+     "altitude_m": 600.0,
+     "code": "WP001",
+     "label": "SAR-04 SPX 1",
+     "point_type": "WAYPOINT",
+     "sequence": 1
+    },
+    {
+     "latitude": 49.51200503054258,
+     "longitude": 20.57325100080149,
+     "altitude_m": 600.0,
+     "code": "WP002",
+     "label": "SAR-04 SPX 2",
+     "point_type": "WAYPOINT",
+     "sequence": 2
+    },
+    {
+     "latitude": 49.512097509264606,
+     "longitude": 20.57310854669798,
+     "altitude_m": 600.0,
+     "code": "WP003",
+     "label": "SAR-04 SPX 3",
+     "point_type": "WAYPOINT",
+     "sequence": 3
+    },
+    {
+     "latitude": 49.51191255182056,
+     "longitude": 20.573393454905002,
+     "altitude_m": 600.0,
+     "code": "WP004",
+     "label": "SAR-04 SPX 4",
+     "point_type": "WAYPOINT",
+     "sequence": 4
+    },
+    {
+     "latitude": 49.51200503054258,
+     "longitude": 20.57325100080149,
+     "altitude_m": 600.0,
+     "code": "WP005",
+     "label": "SAR-04 SPX 5",
+     "point_type": "WAYPOINT",
+     "sequence": 5
+    },
+    {
+     "latitude": 49.512549165826655,
+     "longitude": 20.569281730013337,
+     "altitude_m": 600.0,
+     "code": "WP006",
+     "label": "SAR-04 SPX 6",
+     "point_type": "WAYPOINT",
+     "sequence": 6
+    },
+    {
+     "latitude": 49.509428249103465,
+     "longitude": 20.574089186087637,
+     "altitude_m": 600.0,
+     "code": "WP007",
+     "label": "SAR-04 SPX 7",
+     "point_type": "WAYPOINT",
+     "sequence": 7
+    },
+    {
+     "latitude": 49.51146089525851,
+     "longitude": 20.577220271589646,
+     "altitude_m": 600.0,
+     "code": "WP008",
+     "label": "SAR-04 SPX 8",
+     "point_type": "WAYPOINT",
+     "sequence": 8
+    },
+    {
+     "latitude": 49.51458181198171,
+     "longitude": 20.57241281551535,
+     "altitude_m": 600.0,
+     "code": "WP009",
+     "label": "SAR-04 SPX 9",
+     "point_type": "WAYPOINT",
+     "sequence": 9
+    },
+    {
+     "latitude": 49.51200503054258,
+     "longitude": 20.548620119627216,
+     "altitude_m": 600.0,
+     "code": "WP010",
+     "label": "SAR-04 SPX 10",
+     "point_type": "WAYPOINT",
+     "sequence": 10
+    },
+    {
+     "latitude": 49.512091115954554,
+     "longitude": 20.54857591767488,
+     "altitude_m": 600.0,
+     "code": "WP011",
+     "label": "SAR-04 SPX 11",
+     "point_type": "WAYPOINT",
+     "sequence": 11
+    },
+    {
+     "latitude": 49.51191894513061,
+     "longitude": 20.548664321579547,
+     "altitude_m": 600.0,
+     "code": "WP012",
+     "label": "SAR-04 SPX 12",
+     "point_type": "WAYPOINT",
+     "sequence": 12
+    },
+    {
+     "latitude": 49.527994969457424,
+     "longitude": 20.548620119627216,
+     "altitude_m": 600.0,
+     "code": "WP013",
+     "label": "SAR-04 SPX 13",
+     "point_type": "WAYPOINT",
+     "sequence": 13
+    },
+    {
+     "latitude": 49.543984908372266,
+     "longitude": 20.548620119627216,
+     "altitude_m": 600.0,
+     "code": "WP014",
+     "label": "SAR-04 SPX 14",
+     "point_type": "WAYPOINT",
+     "sequence": 14
+    },
+    {
+     "latitude": 49.54657651792101,
+     "longitude": 20.549481146114204,
+     "altitude_m": 600.0,
+     "code": "WP015",
+     "label": "SAR-04 SPX 15",
+     "point_type": "WAYPOINT",
+     "sequence": 15
+    },
+    {
+     "latitude": 49.543425944978566,
+     "longitude": 20.544628007638217,
+     "altitude_m": 600.0,
+     "code": "WP016",
+     "label": "SAR-04 SPX 16",
+     "point_type": "WAYPOINT",
+     "sequence": 16
+    },
+    {
+     "latitude": 49.541393298823515,
+     "longitude": 20.54775909314023,
+     "altitude_m": 600.0,
+     "code": "WP017",
+     "label": "SAR-04 SPX 17",
+     "point_type": "WAYPOINT",
+     "sequence": 17
+    },
+    {
+     "latitude": 49.54454387176596,
+     "longitude": 20.552612231616212,
+     "altitude_m": 600.0,
+     "code": "WP018",
+     "label": "SAR-04 SPX 18",
+     "point_type": "WAYPOINT",
+     "sequence": 18
+    },
+    {
+     "latitude": 49.527994969457424,
+     "longitude": 20.548620119627216,
+     "altitude_m": 600.0,
+     "code": "WP019",
+     "label": "SAR-04 SPX 19",
+     "point_type": "WAYPOINT",
+     "sequence": 19
+    },
+    {
+     "latitude": 49.51200503054258,
+     "longitude": 20.548620119627216,
+     "altitude_m": 600.0,
+     "code": "WP020",
+     "label": "SAR-04 SPX 20",
+     "point_type": "WAYPOINT",
+     "sequence": 20
+    },
+    {
+     "latitude": 49.51366398562511,
+     "longitude": 20.545434528865805,
+     "altitude_m": 600.0,
+     "code": "WP021",
+     "label": "SAR-04 SPX 21",
+     "point_type": "WAYPOINT",
+     "sequence": 21
+    },
+    {
+     "latitude": 49.50943704846468,
+     "longitude": 20.54760491837311,
+     "altitude_m": 600.0,
+     "code": "WP022",
+     "label": "SAR-04 SPX 22",
+     "point_type": "WAYPOINT",
+     "sequence": 22
+    },
+    {
+     "latitude": 49.510346075460056,
+     "longitude": 20.551805710388624,
+     "altitude_m": 600.0,
+     "code": "WP023",
+     "label": "SAR-04 SPX 23",
+     "point_type": "WAYPOINT",
+     "sequence": 23
+    },
+    {
+     "latitude": 49.51457301262049,
+     "longitude": 20.549635320881322,
+     "altitude_m": 600.0,
+     "code": "WP024",
+     "label": "SAR-04 SPX 24",
+     "point_type": "WAYPOINT",
+     "sequence": 24
+    },
+    {
+     "latitude": 49.49601509162774,
+     "longitude": 20.548620119627216,
+     "altitude_m": 600.0,
+     "code": "WP025",
+     "label": "SAR-04 SPX 25",
+     "point_type": "WAYPOINT",
+     "sequence": 25
+    },
+    {
+     "latitude": 49.480025152712905,
+     "longitude": 20.548620119627216,
+     "altitude_m": 600.0,
+     "code": "WP026",
+     "label": "SAR-04 SPX 26",
+     "point_type": "WAYPOINT",
+     "sequence": 26
+    },
+    {
+     "latitude": 49.4799388692154,
+     "longitude": 20.544538372524155,
+     "altitude_m": 600.0,
+     "code": "WP027",
+     "label": "SAR-04 SPX 27",
+     "point_type": "WAYPOINT",
+     "sequence": 27
+    },
+    {
+     "latitude": 49.47764649068195,
+     "longitude": 20.550423667392458,
+     "altitude_m": 600.0,
+     "code": "WP028",
+     "label": "SAR-04 SPX 28",
+     "point_type": "WAYPOINT",
+     "sequence": 28
+    },
+    {
+     "latitude": 49.48011143621041,
+     "longitude": 20.552701866730274,
+     "altitude_m": 600.0,
+     "code": "WP029",
+     "label": "SAR-04 SPX 29",
+     "point_type": "WAYPOINT",
+     "sequence": 29
+    },
+    {
+     "latitude": 49.48240381474386,
+     "longitude": 20.54681657186197,
+     "altitude_m": 600.0,
+     "code": "WP030",
+     "label": "SAR-04 SPX 30",
+     "point_type": "WAYPOINT",
+     "sequence": 30
+    }
+   ]
+  },
+  {
+   "vehicle_id": 5,
+   "vehicle_code": "SAR-05",
+   "waypoints": [
+    {
+     "latitude": 49.501930463273325,
+     "longitude": 20.559689017219956,
+     "altitude_m": 600.0,
+     "code": "WP001",
+     "label": "SAR-05 SPX 1",
+     "point_type": "WAYPOINT",
+     "sequence": 1
+    },
+    {
+     "latitude": 49.509512445747646,
+     "longitude": 20.5508368989329,
+     "altitude_m": 600.0,
+     "code": "WP002",
+     "label": "SAR-05 SPX 2",
+     "point_type": "WAYPOINT",
+     "sequence": 2
+    },
+    {
+     "latitude": 49.51119843975569,
+     "longitude": 20.549971197938174,
+     "altitude_m": 600.0,
+     "code": "WP003",
+     "label": "SAR-05 SPX 3",
+     "point_type": "WAYPOINT",
+     "sequence": 3
+    },
+    {
+     "latitude": 49.507826451739604,
+     "longitude": 20.551702599927626,
+     "altitude_m": 600.0,
+     "code": "WP004",
+     "label": "SAR-05 SPX 4",
+     "point_type": "WAYPOINT",
+     "sequence": 4
+    },
+    {
+     "latitude": 49.509512445747646,
+     "longitude": 20.5508368989329,
+     "altitude_m": 600.0,
+     "code": "WP005",
+     "label": "SAR-05 SPX 5",
+     "point_type": "WAYPOINT",
+     "sequence": 5
+    },
+    {
+     "latitude": 49.51090141380072,
+     "longitude": 20.54778993739487,
+     "altitude_m": 600.0,
+     "code": "WP006",
+     "label": "SAR-05 SPX 6",
+     "point_type": "WAYPOINT",
+     "sequence": 6
+    },
+    {
+     "latitude": 49.507214450699195,
+     "longitude": 20.549683068455415,
+     "altitude_m": 600.0,
+     "code": "WP007",
+     "label": "SAR-05 SPX 7",
+     "point_type": "WAYPOINT",
+     "sequence": 7
+    },
+    {
+     "latitude": 49.508123477694575,
+     "longitude": 20.55388386047093,
+     "altitude_m": 600.0,
+     "code": "WP008",
+     "label": "SAR-05 SPX 8",
+     "point_type": "WAYPOINT",
+     "sequence": 8
+    },
+    {
+     "latitude": 49.5118104407961,
+     "longitude": 20.551990729410388,
+     "altitude_m": 600.0,
+     "code": "WP009",
+     "label": "SAR-05 SPX 9",
+     "point_type": "WAYPOINT",
+     "sequence": 9
+    },
+    {
+     "latitude": 49.52550238466249,
+     "longitude": 20.5508368989329,
+     "altitude_m": 600.0,
+     "code": "WP010",
+     "label": "SAR-05 SPX 10",
+     "point_type": "WAYPOINT",
+     "sequence": 10
+    },
+    {
+     "latitude": 49.52609530328052,
+     "longitude": 20.55114134262308,
+     "altitude_m": 600.0,
+     "code": "WP011",
+     "label": "SAR-05 SPX 11",
+     "point_type": "WAYPOINT",
+     "sequence": 11
+    },
+    {
+     "latitude": 49.52490946604445,
+     "longitude": 20.55053245524272,
+     "altitude_m": 600.0,
+     "code": "WP012",
+     "label": "SAR-05 SPX 12",
+     "point_type": "WAYPOINT",
+     "sequence": 12
+    },
+    {
+     "latitude": 49.54149232357732,
+     "longitude": 20.5508368989329,
+     "altitude_m": 600.0,
+     "code": "WP013",
+     "label": "SAR-05 SPX 13",
+     "point_type": "WAYPOINT",
+     "sequence": 13
+    },
+    {
+     "latitude": 49.557482262492165,
+     "longitude": 20.5508368989329,
+     "altitude_m": 600.0,
+     "code": "WP014",
+     "label": "SAR-05 SPX 14",
+     "point_type": "WAYPOINT",
+     "sequence": 14
+    },
+    {
+     "latitude": 49.55986092452312,
+     "longitude": 20.552640446698145,
+     "altitude_m": 600.0,
+     "code": "WP015",
+     "label": "SAR-05 SPX 15",
+     "point_type": "WAYPOINT",
+     "sequence": 15
+    },
+    {
+     "latitude": 49.55756854598967,
+     "longitude": 20.54675515182984,
+     "altitude_m": 600.0,
+     "code": "WP016",
+     "label": "SAR-05 SPX 16",
+     "point_type": "WAYPOINT",
+     "sequence": 16
+    },
+    {
+     "latitude": 49.55510360046121,
+     "longitude": 20.549033351167658,
+     "altitude_m": 600.0,
+     "code": "WP017",
+     "label": "SAR-05 SPX 17",
+     "point_type": "WAYPOINT",
+     "sequence": 17
+    },
+    {
+     "latitude": 49.55739597899466,
+     "longitude": 20.55491864603596,
+     "altitude_m": 600.0,
+     "code": "WP018",
+     "label": "SAR-05 SPX 18",
+     "point_type": "WAYPOINT",
+     "sequence": 18
+    },
+    {
+     "latitude": 49.557482262492165,
+     "longitude": 20.5508368989329,
+     "altitude_m": 600.0,
+     "code": "WP019",
+     "label": "SAR-05 SPX 19",
+     "point_type": "WAYPOINT",
+     "sequence": 19
+    },
+    {
+     "latitude": 49.559545811432,
+     "longitude": 20.551831447036417,
+     "altitude_m": 600.0,
+     "code": "WP020",
+     "label": "SAR-05 SPX 20",
+     "point_type": "WAYPOINT",
+     "sequence": 20
+    },
+    {
+     "latitude": 49.55788365908079,
+     "longitude": 20.547564151491567,
+     "altitude_m": 600.0,
+     "code": "WP021",
+     "label": "SAR-05 SPX 21",
+     "point_type": "WAYPOINT",
+     "sequence": 21
+    },
+    {
+     "latitude": 49.55541871355233,
+     "longitude": 20.549842350829383,
+     "altitude_m": 600.0,
+     "code": "WP022",
+     "label": "SAR-05 SPX 22",
+     "point_type": "WAYPOINT",
+     "sequence": 22
+    },
+    {
+     "latitude": 49.557080865903544,
+     "longitude": 20.554109646374233,
+     "altitude_m": 600.0,
+     "code": "WP023",
+     "label": "SAR-05 SPX 23",
+     "point_type": "WAYPOINT",
+     "sequence": 23
+    },
+    {
+     "latitude": 49.54149232357732,
+     "longitude": 20.5508368989329,
+     "altitude_m": 600.0,
+     "code": "WP024",
+     "label": "SAR-05 SPX 24",
+     "point_type": "WAYPOINT",
+     "sequence": 24
+    },
+    {
+     "latitude": 49.541542246373425,
+     "longitude": 20.550913799943288,
+     "altitude_m": 600.0,
+     "code": "WP025",
+     "label": "SAR-05 SPX 25",
+     "point_type": "WAYPOINT",
+     "sequence": 25
+    },
+    {
+     "latitude": 49.54144240078123,
+     "longitude": 20.550759997922512,
+     "altitude_m": 600.0,
+     "code": "WP026",
+     "label": "SAR-05 SPX 26",
+     "point_type": "WAYPOINT",
+     "sequence": 26
+    },
+    {
+     "latitude": 49.54149232357732,
+     "longitude": 20.575467780107175,
+     "altitude_m": 600.0,
+     "code": "WP027",
+     "label": "SAR-05 SPX 27",
+     "point_type": "WAYPOINT",
+     "sequence": 27
+    },
+    {
+     "latitude": 49.557482262492165,
+     "longitude": 20.575467780107175,
+     "altitude_m": 600.0,
+     "code": "WP028",
+     "label": "SAR-05 SPX 28",
+     "point_type": "WAYPOINT",
+     "sequence": 28
+    },
+    {
+     "latitude": 49.557482262492165,
+     "longitude": 20.5508368989329,
+     "altitude_m": 600.0,
+     "code": "WP029",
+     "label": "SAR-05 SPX 29",
+     "point_type": "WAYPOINT",
+     "sequence": 29
+    },
+    {
+     "latitude": 49.55986092452312,
+     "longitude": 20.552640446698145,
+     "altitude_m": 600.0,
+     "code": "WP030",
+     "label": "SAR-05 SPX 30",
+     "point_type": "WAYPOINT",
+     "sequence": 30
+    },
+    {
+     "latitude": 49.55756854598967,
+     "longitude": 20.54675515182984,
+     "altitude_m": 600.0,
+     "code": "WP031",
+     "label": "SAR-05 SPX 31",
+     "point_type": "WAYPOINT",
+     "sequence": 31
+    },
+    {
+     "latitude": 49.55510360046121,
+     "longitude": 20.549033351167658,
+     "altitude_m": 600.0,
+     "code": "WP032",
+     "label": "SAR-05 SPX 32",
+     "point_type": "WAYPOINT",
+     "sequence": 32
+    },
+    {
+     "latitude": 49.55739597899466,
+     "longitude": 20.55491864603596,
+     "altitude_m": 600.0,
+     "code": "WP033",
+     "label": "SAR-05 SPX 33",
+     "point_type": "WAYPOINT",
+     "sequence": 33
+    }
+   ]
+  },
+  {
+   "vehicle_id": 6,
+   "vehicle_code": "SAR-06",
+   "waypoints": [
+    {
+     "latitude": 49.495348249270776,
+     "longitude": 20.57807803408076,
+     "altitude_m": 600.0,
+     "code": "WP001",
+     "label": "SAR-06 SPX 1",
+     "point_type": "WAYPOINT",
+     "sequence": 1
+    },
+    {
+     "latitude": 49.493522506832804,
+     "longitude": 20.579901338718546,
+     "altitude_m": 600.0,
+     "code": "WP002",
+     "label": "SAR-06 SPX 2",
+     "point_type": "WAYPOINT",
+     "sequence": 2
+    },
+    {
+     "latitude": 49.49275331167708,
+     "longitude": 20.57645462035468,
+     "altitude_m": 600.0,
+     "code": "WP003",
+     "label": "SAR-06 SPX 3",
+     "point_type": "WAYPOINT",
+     "sequence": 3
+    },
+    {
+     "latitude": 49.491564621002404,
+     "longitude": 20.581947793077237,
+     "altitude_m": 600.0,
+     "code": "WP004",
+     "label": "SAR-06 SPX 4",
+     "point_type": "WAYPOINT",
+     "sequence": 4
+    },
+    {
+     "latitude": 49.49429170198854,
+     "longitude": 20.58334805708241,
+     "altitude_m": 600.0,
+     "code": "WP005",
+     "label": "SAR-06 SPX 5",
+     "point_type": "WAYPOINT",
+     "sequence": 5
+    },
+    {
+     "latitude": 49.495480392663204,
+     "longitude": 20.577854884359855,
+     "altitude_m": 600.0,
+     "code": "WP006",
+     "label": "SAR-06 SPX 6",
+     "point_type": "WAYPOINT",
+     "sequence": 6
+    },
+    {
+     "latitude": 49.493522506832804,
+     "longitude": 20.579901338718546,
+     "altitude_m": 600.0,
+     "code": "WP007",
+     "label": "SAR-06 SPX 7",
+     "point_type": "WAYPOINT",
+     "sequence": 7
+    },
+    {
+     "latitude": 49.492684326093354,
+     "longitude": 20.576773416265866,
+     "altitude_m": 600.0,
+     "code": "WP008",
+     "label": "SAR-06 SPX 8",
+     "point_type": "WAYPOINT",
+     "sequence": 8
+    },
+    {
+     "latitude": 49.49163360658613,
+     "longitude": 20.581628997166057,
+     "altitude_m": 600.0,
+     "code": "WP009",
+     "label": "SAR-06 SPX 9",
+     "point_type": "WAYPOINT",
+     "sequence": 9
+    },
+    {
+     "latitude": 49.494360687572254,
+     "longitude": 20.583029261171227,
+     "altitude_m": 600.0,
+     "code": "WP010",
+     "label": "SAR-06 SPX 10",
+     "point_type": "WAYPOINT",
+     "sequence": 10
+    },
+    {
+     "latitude": 49.49541140707949,
+     "longitude": 20.578173680271036,
+     "altitude_m": 600.0,
+     "code": "WP011",
+     "label": "SAR-06 SPX 11",
+     "point_type": "WAYPOINT",
+     "sequence": 11
+    },
+    {
+     "latitude": 49.493522506832804,
+     "longitude": 20.579901338718546,
+     "altitude_m": 600.0,
+     "code": "WP012",
+     "label": "SAR-06 SPX 12",
+     "point_type": "WAYPOINT",
+     "sequence": 12
+    },
+    {
+     "latitude": 49.4927522548957,
+     "longitude": 20.576459503948666,
+     "altitude_m": 600.0,
+     "code": "WP013",
+     "label": "SAR-06 SPX 13",
+     "point_type": "WAYPOINT",
+     "sequence": 13
+    },
+    {
+     "latitude": 49.49156567778378,
+     "longitude": 20.581942909483256,
+     "altitude_m": 600.0,
+     "code": "WP014",
+     "label": "SAR-06 SPX 14",
+     "point_type": "WAYPOINT",
+     "sequence": 14
+    },
+    {
+     "latitude": 49.49429275876991,
+     "longitude": 20.583343173488426,
+     "altitude_m": 600.0,
+     "code": "WP015",
+     "label": "SAR-06 SPX 15",
+     "point_type": "WAYPOINT",
+     "sequence": 15
+    },
+    {
+     "latitude": 49.49547933588183,
+     "longitude": 20.57785976795384,
+     "altitude_m": 600.0,
+     "code": "WP016",
+     "label": "SAR-06 SPX 16",
+     "point_type": "WAYPOINT",
+     "sequence": 16
+    },
+    {
+     "latitude": 49.493522506832804,
+     "longitude": 20.55527045754427,
+     "altitude_m": 600.0,
+     "code": "WP017",
+     "label": "SAR-06 SPX 17",
+     "point_type": "WAYPOINT",
+     "sequence": 17
+    },
+    {
+     "latitude": 49.49375445906837,
+     "longitude": 20.554913158621314,
+     "altitude_m": 600.0,
+     "code": "WP018",
+     "label": "SAR-06 SPX 18",
+     "point_type": "WAYPOINT",
+     "sequence": 18
+    },
+    {
+     "latitude": 49.49329055459724,
+     "longitude": 20.555627756467224,
+     "altitude_m": 600.0,
+     "code": "WP019",
+     "label": "SAR-06 SPX 19",
+     "point_type": "WAYPOINT",
+     "sequence": 19
+    },
+    {
+     "latitude": 49.493522506832804,
+     "longitude": 20.55527045754427,
+     "altitude_m": 600.0,
+     "code": "WP020",
+     "label": "SAR-06 SPX 20",
+     "point_type": "WAYPOINT",
+     "sequence": 20
+    },
+    {
+     "latitude": 49.49404428396313,
+     "longitude": 20.551335627227164,
+     "altitude_m": 600.0,
+     "code": "WP021",
+     "label": "SAR-06 SPX 21",
+     "point_type": "WAYPOINT",
+     "sequence": 21
+    },
+    {
+     "latitude": 49.490968083547436,
+     "longitude": 20.556074202359365,
+     "altitude_m": 600.0,
+     "code": "WP022",
+     "label": "SAR-06 SPX 22",
+     "point_type": "WAYPOINT",
+     "sequence": 22
+    },
+    {
+     "latitude": 49.49300072970248,
+     "longitude": 20.559205287861374,
+     "altitude_m": 600.0,
+     "code": "WP023",
+     "label": "SAR-06 SPX 23",
+     "point_type": "WAYPOINT",
+     "sequence": 23
+    },
+    {
+     "latitude": 49.49607693011818,
+     "longitude": 20.554466712729177,
+     "altitude_m": 600.0,
+     "code": "WP024",
+     "label": "SAR-06 SPX 24",
+     "point_type": "WAYPOINT",
+     "sequence": 24
+    },
+    {
+     "latitude": 49.509512445747646,
+     "longitude": 20.55527045754427,
+     "altitude_m": 600.0,
+     "code": "WP025",
+     "label": "SAR-06 SPX 25",
+     "point_type": "WAYPOINT",
+     "sequence": 25
+    },
+    {
+     "latitude": 49.51017481500307,
+     "longitude": 20.55493035329683,
+     "altitude_m": 600.0,
+     "code": "WP026",
+     "label": "SAR-06 SPX 26",
+     "point_type": "WAYPOINT",
+     "sequence": 26
+    },
+    {
+     "latitude": 49.50885007649222,
+     "longitude": 20.555610561791713,
+     "altitude_m": 600.0,
+     "code": "WP027",
+     "label": "SAR-06 SPX 27",
+     "point_type": "WAYPOINT",
+     "sequence": 27
+    },
+    {
+     "latitude": 49.509512445747646,
+     "longitude": 20.530639576369992,
+     "altitude_m": 600.0,
+     "code": "WP028",
+     "label": "SAR-06 SPX 28",
+     "point_type": "WAYPOINT",
+     "sequence": 28
+    },
+    {
+     "latitude": 49.51141509772913,
+     "longitude": 20.527795549975806,
+     "altitude_m": 600.0,
+     "code": "WP029",
+     "label": "SAR-06 SPX 29",
+     "point_type": "WAYPOINT",
+     "sequence": 29
+    },
+    {
+     "latitude": 49.50704603915563,
+     "longitude": 20.529141568408274,
+     "altitude_m": 600.0,
+     "code": "WP030",
+     "label": "SAR-06 SPX 30",
+     "point_type": "WAYPOINT",
+     "sequence": 30
+    },
+    {
+     "latitude": 49.507609793766164,
+     "longitude": 20.533483602764182,
+     "altitude_m": 600.0,
+     "code": "WP031",
+     "label": "SAR-06 SPX 31",
+     "point_type": "WAYPOINT",
+     "sequence": 31
+    },
+    {
+     "latitude": 49.51197885233965,
+     "longitude": 20.532137584331714,
+     "altitude_m": 600.0,
+     "code": "WP032",
+     "label": "SAR-06 SPX 32",
+     "point_type": "WAYPOINT",
+     "sequence": 32
+    },
+    {
+     "latitude": 49.509512445747646,
+     "longitude": 20.530639576369992,
+     "altitude_m": 600.0,
+     "code": "WP033",
+     "label": "SAR-06 SPX 33",
+     "point_type": "WAYPOINT",
+     "sequence": 33
+    },
+    {
+     "latitude": 49.510814521719404,
+     "longitude": 20.527980575277155,
+     "altitude_m": 600.0,
+     "code": "WP034",
+     "label": "SAR-06 SPX 34",
+     "point_type": "WAYPOINT",
+     "sequence": 34
+    },
+    {
+     "latitude": 49.507646615165356,
+     "longitude": 20.528956543106922,
+     "altitude_m": 600.0,
+     "code": "WP035",
+     "label": "SAR-06 SPX 35",
+     "point_type": "WAYPOINT",
+     "sequence": 35
+    },
+    {
+     "latitude": 49.50821036977588,
+     "longitude": 20.53329857746283,
+     "altitude_m": 600.0,
+     "code": "WP036",
+     "label": "SAR-06 SPX 36",
+     "point_type": "WAYPOINT",
+     "sequence": 36
+    },
+    {
+     "latitude": 49.511378276329935,
+     "longitude": 20.532322609633063,
+     "altitude_m": 600.0,
+     "code": "WP037",
+     "label": "SAR-06 SPX 37",
+     "point_type": "WAYPOINT",
+     "sequence": 37
+    },
+    {
+     "latitude": 49.52550238466249,
+     "longitude": 20.530639576369992,
+     "altitude_m": 600.0,
+     "code": "WP038",
+     "label": "SAR-06 SPX 38",
+     "point_type": "WAYPOINT",
+     "sequence": 38
+    },
+    {
+     "latitude": 49.525993103064025,
+     "longitude": 20.5307907567679,
+     "altitude_m": 600.0,
+     "code": "WP039",
+     "label": "SAR-06 SPX 39",
+     "point_type": "WAYPOINT",
+     "sequence": 39
+    },
+    {
+     "latitude": 49.525011666260944,
+     "longitude": 20.530488395972085,
+     "altitude_m": 600.0,
+     "code": "WP040",
+     "label": "SAR-06 SPX 40",
+     "point_type": "WAYPOINT",
+     "sequence": 40
+    },
+    {
+     "latitude": 49.509512445747646,
+     "longitude": 20.530639576369992,
+     "altitude_m": 600.0,
+     "code": "WP041",
+     "label": "SAR-06 SPX 41",
+     "point_type": "WAYPOINT",
+     "sequence": 41
+    },
+    {
+     "latitude": 49.509644408686576,
+     "longitude": 20.530598921261983,
+     "altitude_m": 600.0,
+     "code": "WP042",
+     "label": "SAR-06 SPX 42",
+     "point_type": "WAYPOINT",
+     "sequence": 42
+    },
+    {
+     "latitude": 49.509380482808716,
+     "longitude": 20.530680231478,
+     "altitude_m": 600.0,
+     "code": "WP043",
+     "label": "SAR-06 SPX 43",
+     "point_type": "WAYPOINT",
+     "sequence": 43
+    },
+    {
+     "latitude": 49.509512445747646,
+     "longitude": 20.55527045754427,
+     "altitude_m": 600.0,
+     "code": "WP044",
+     "label": "SAR-06 SPX 44",
+     "point_type": "WAYPOINT",
+     "sequence": 44
+    },
+    {
+     "latitude": 49.50951917466942,
+     "longitude": 20.555267002470142,
+     "altitude_m": 600.0,
+     "code": "WP045",
+     "label": "SAR-06 SPX 45",
+     "point_type": "WAYPOINT",
+     "sequence": 45
+    },
+    {
+     "latitude": 49.50950571682587,
+     "longitude": 20.555273912618397,
+     "altitude_m": 600.0,
+     "code": "WP046",
+     "label": "SAR-06 SPX 46",
+     "point_type": "WAYPOINT",
+     "sequence": 46
+    }
+   ]
+  }
+ ],
+ "return_point": null,
+ "zones": [
+  {
+   "code": "SAFE01",
+   "label": "Saudi Desert Safe Zone",
+   "zone_type": "SAFE",
+   "vertices": [
+    {
+     "latitude": 49.40157845660663,
+     "longitude": 20.139259465715874,
+     "altitude_m": 0.0
+    },
+    {
+     "latitude": 49.381366455169335,
+     "longitude": 20.157216864874695,
+     "altitude_m": 0.0
+    },
+    {
+     "latitude": 49.381366455169335,
+     "longitude": 20.121302066557053,
+     "altitude_m": 0.0
+    }
+   ]
+  }
+ ],
+ "initial_subjects": [
+  {
+   "track_id": 101,
+   "subject_type": "MISSING_PERSON_CHILD",
+   "latitude": 49.527142756649255,
+   "longitude": 20.55699192075313,
+   "altitude_m": 0.0,
+   "country": "SIM",
+   "platform_name": "SIMULATED MISSING CHILD",
+   "speed_mps": 5.277777777777778,
+   "heading_deg": 118.0,
+   "position_uncertainty_m": 500.0,
+   "source": "SAR-C2-SIM",
+   "track_age_s": 20.0,
+   "motion_profile": [
+    {
+     "start_s": 0.0,
+     "mode": "ORBIT",
+     "speed_kph": 19.0,
+     "center_latitude": 49.527994969457424,
+     "center_longitude": 20.553053678238584,
+     "radius_m": 300.0,
+     "clockwise": true
+    }
+   ]
+  },
+  {
+   "track_id": 102,
+   "subject_type": "MISSING_PERSON_ADULT",
+   "latitude": 49.56525427327173,
+   "longitude": 20.713432281109675,
+   "altitude_m": 0.0,
+   "country": "SIM",
+   "platform_name": "SIMULATED MISSING ADULT",
+   "speed_mps": 0.0,
+   "heading_deg": 0.0,
+   "position_uncertainty_m": 700.0,
+   "source": "SAR-C2-SIM",
+   "track_age_s": 30.0,
+   "motion_profile": [
+    {
+     "start_s": 0.0,
+     "mode": "ORBIT",
+     "speed_kph": 15.0,
+     "center_latitude": 49.566460369752896,
+     "center_longitude": 20.71790650980234,
+     "radius_m": 350.0,
+     "clockwise": true
+    }
+   ]
+  }
+ ]
+}

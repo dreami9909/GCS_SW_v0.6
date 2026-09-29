@@ -1,0 +1,2044 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    html, body, #mapHost { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #07100d; }
+    body { font-family: "IBM Plex Mono", Consolas, "Malgun Gothic", monospace; }
+    gmp-map-3d { width: 100%; height: 100%; display: block; }
+    .hud {
+      position: fixed; z-index: 30; color: #8de69d;
+      background: rgba(5, 12, 8, .90); border: 1px solid #526455;
+      box-shadow: 0 2px 0 rgba(0, 0, 0, .7); letter-spacing: .4px;
+    }
+    #status { left: 14px; top: 14px; padding: 8px 11px; font-size: 12px; pointer-events: none; display: none; }
+    #zoomPanel { right: 14px; top: 14px; display: none; align-items: center; }
+    #zoomPanel button {
+      width: 36px; height: 34px; color: #f0bd42; background: #162019;
+      border: 0; border-right: 1px solid #465448; font: 700 18px Consolas;
+      cursor: pointer;
+    }
+    #zoomPanel button:last-child { border-right: 0; border-left: 1px solid #465448; }
+    #zoomPanel button:hover { background: #2b392d; }
+    #gridDistance { min-width: 112px; text-align: center; color: #c8d3c8; font-size: 11px; }
+    #legend { left: 14px; bottom: 14px; padding: 7px 10px; font-size: 10px; color: #aebbad; pointer-events: none; display: none; }
+    #legend span { margin-right: 11px; }
+    .team { color: #4db3ff; } .subject { color: #ff5a50; }
+    .approach { color: #f7bd3c; } .safe { color: #55e77a; }
+    .shutdown-badge {
+      min-width: 112px; color: #ff4e47; text-align: center;
+      font: 800 13px "IBM Plex Mono", Consolas, monospace;
+      text-shadow: 0 2px 2px #000;
+    }
+    .shutdown-badge .cross { font-size: 42px; line-height: 34px; }
+    .shutdown-badge .caption {
+      margin-top: 4px; padding: 3px 7px; color: #fff;
+      background: rgba(91, 10, 8, .88); border: 1px solid #ff4e47;
+    }
+    .auto-waypoint {
+      width: 8px; height: 8px; box-sizing: border-box; border-radius: 50%;
+      border: 1px solid rgba(235, 246, 235, .82);
+      background: var(--auto-color, #55e77a); opacity: .44;
+      box-shadow: 0 0 5px rgba(220, 255, 225, .45);
+    }
+    .auto-waypoint.queued {
+      width: 11px; height: 11px; opacity: .86;
+      border-width: 2px; box-shadow: 0 0 8px var(--auto-color, #55e77a);
+    }
+    .auto-waypoint.manual-preview {
+      opacity:.34 !important; background:transparent;
+      border:2px dashed var(--auto-color,#55e77a);
+      box-shadow:0 0 7px var(--auto-color,#55e77a);
+    }
+    .auto-waypoint.manual-hold {
+      border-color:#f5f0d0; box-shadow:0 0 9px var(--auto-color,#55e77a);
+    }
+    .auto-waypoint.changed {
+      animation: rhpWaypointPulse 1.35s ease-out 1;
+    }
+    .auto-waypoint-wrap { position:relative; width:11px; height:11px; }
+    .auto-waypoint-label {
+      display:none; position:absolute; left:14px; top:-8px;
+      min-width:150px; padding:3px 5px; color:#f2fff4;
+      background:rgba(4,14,8,.91); border:1px solid var(--auto-color,#55e77a);
+      font:800 9px "IBM Plex Mono",Consolas,monospace;
+      text-shadow:0 1px 2px #000; white-space:nowrap;
+    }
+    .auto-waypoint-wrap.representative .auto-waypoint-label { display:block; }
+    .auto-waypoint.retiring {
+      width:10px; height:10px; background:transparent;
+      border:2px solid var(--auto-color,#55e77a);
+      animation:rhpWaypointRetire 1.35s ease-in forwards;
+    }
+    @keyframes rhpWaypointPulse {
+      0% { transform:scale(2.2); opacity:1; box-shadow:0 0 18px #fff; }
+      55% { transform:scale(1.35); opacity:1; box-shadow:0 0 13px var(--auto-color, #55e77a); }
+      100% { transform:scale(1); opacity:.86; box-shadow:0 0 8px var(--auto-color, #55e77a); }
+    }
+    @keyframes rhpWaypointRetire {
+      0% { transform:scale(1); opacity:.58; }
+      100% { transform:scale(.55); opacity:0; }
+    }
+    .rhp-search-label {
+      padding: 3px 7px; color: #dfffe7;
+      border: 1px solid rgba(111, 255, 145, .82);
+      background: rgba(5, 20, 10, .86);
+      font: 800 11px "IBM Plex Mono", Consolas, monospace;
+      text-shadow: 0 1px 2px #000; white-space: nowrap;
+    }
+    .tp-marker {
+      display:flex; align-items:center; gap:7px; transform:translate(-14px,-14px);
+      color:#edfff2; white-space:nowrap; pointer-events:none;
+      font:900 12px "IBM Plex Mono",Consolas,monospace;
+      text-shadow:0 2px 3px #000;
+    }
+    .tp-marker .tp-core {
+      display:grid; place-items:center; width:28px; height:28px;
+      color:#06140a; background:#55ff9a; border:3px solid #f2fff5;
+      border-radius:50%; box-shadow:0 0 5px #000,0 0 16px #55ff9a;
+      font-size:11px; line-height:1;
+    }
+    .tp-marker .tp-label {
+      padding:4px 7px; background:rgba(4,18,9,.92);
+      border:1px solid #55ff9a; box-shadow:0 2px 4px #000;
+    }
+  </style>
+  <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+</head>
+<body>
+  <div id="mapHost"></div>
+  <div id="status" class="hud">MISSION MAP // GOOGLE MAPS 3D INITIALIZING</div>
+  <div id="zoomPanel" class="hud">
+    <button id="zoomIn" title="확대">+</button>
+    <div id="gridDistance">격자 001.6 km</div>
+    <button id="zoomOut" title="축소">−</button>
+  </div>
+  <div id="legend" class="hud">
+    <span class="team">▣ 기지/시설</span>
+    <span class="subject">◇ 탐지 대상</span>
+    <span class="safe">▱ 안전지대</span>
+  </div>
+  <script>
+    let map3d = null;
+    let bridge = null;
+    let maps3d = null;
+    let PinElementClass = null;
+    let latestPlan = "{}";
+    let latestState = "{}";
+    let latestFlyPlan = {};
+    let mapMode = "PLAN";
+    let planSelectedVehicleId = 0;
+    let renderScheduled = false;
+    let cameraInitialized = false;
+    let currentRange = 6500;
+    let mapContextHandled = false;
+    let rightPointerPending = false;
+
+    const planMarkers = new Map();
+    const tacticalMarkers = new Map();
+    const zonePolygons = new Map();
+    const tacticalFrames = new Map();
+    const headingLines = new Map();
+    const flightPathSegments = new Map();
+    const flightPathSignatures = new Map();
+    const plannedRouteSegments = new Map();
+    const planRouteLines = new Map();
+    const planningFootprints = new Map();
+    const planningBeliefs = new Map();
+    const planningCandidateLines = new Map();
+    const planningCandidateMarkers = new Map();
+    const planningRetiredMarkers = new Map();
+    const planningSearchRings = [];
+    let plannedRouteSignature = "";
+    let flyPlanSignature = "";
+    let planningCandidateSignature = "";
+    let planningSearchSignature = "";
+    let planningGeometrySignature = "";
+    let planningSearchMarker = null;
+    let retiredWaypointSequence = 0;
+    let rendezvousMarker = null;
+    let rendezvousCrossA = null;
+    let rendezvousCrossB = null;
+    let rendezvousUncertainty = null;
+    let shutdownMarker = null;
+    let loiterOrbit = null;
+    let loiterMarker = null;
+    let emergencyReturnLine = null;
+    let ingressCorridorPolygon = null;
+
+    const colors = {
+      GCS: "#4db3ff", RDR: "#55e77a", LC: "#f3b52d",
+      WAYPOINT: "#e9ce72", RETURN: "#58c7ff", SAFE: "#55e77a",
+      UAV: "#4db3ff", SUBJECT: "#ff534b", SELECTED: "#ffbf38",
+      APPROACH: "#ffd34f"
+    };
+    const vehicleColors = {
+      1: "#43b8ff",
+      2: "#65d96f",
+      3: "#f3b52d",
+      4: "#b78cff",
+      5: "#ff884d",
+      6: "#42d4c5"
+    };
+    const TRAIL_FADE_SEGMENTS = 6;
+    const ROUTE_DASH_POOL_SIZE = 12;
+
+    function vehicleColor(vehicleId) {
+      return vehicleColors[Number(vehicleId)] || colors.UAV;
+    }
+
+    function withAlpha(color, alpha) {
+      const value = String(color).replace("#", "");
+      if (!/^[0-9a-fA-F]{6}$/.test(value)) return color;
+      const red = parseInt(value.slice(0, 2), 16);
+      const green = parseInt(value.slice(2, 4), 16);
+      const blue = parseInt(value.slice(4, 6), 16);
+      return `rgba(${red},${green},${blue},${alpha})`;
+    }
+
+    function positionOf(item, defaultAltitude = 0) {
+      return {
+        lat: Number(item.latitude),
+        lng: Number(item.longitude),
+        altitude: Number(item.altitude_m ?? defaultAltitude)
+      };
+    }
+
+    function geographicCircle(center, radiusM, steps = 72) {
+      const latitude = Number(center.latitude);
+      const longitude = Number(center.longitude);
+      const latitudeRadians = latitude * Math.PI / 180.0;
+      const metersPerLatitudeDegree = 111320.0;
+      const metersPerLongitudeDegree = Math.max(
+        1.0,
+        metersPerLatitudeDegree * Math.cos(latitudeRadians)
+      );
+      const points = [];
+      for (let index = 0; index <= steps; index += 1) {
+        const angle = 2.0 * Math.PI * index / steps;
+        points.push({
+          lat: latitude + Math.cos(angle) * radiusM / metersPerLatitudeDegree,
+          lng: longitude + Math.sin(angle) * radiusM / metersPerLongitudeDegree,
+          altitude: Number(center.altitude_m ?? 5.0)
+        });
+      }
+      return points;
+    }
+
+    function connectBridge() {
+      if (!window.qt || !qt.webChannelTransport) {
+        setTimeout(connectBridge, 100);
+        return;
+      }
+      new QWebChannel(qt.webChannelTransport, channel => {
+        bridge = channel.objects.bridge;
+        bridge.planChanged.connect(schedulePlanRender);
+        bridge.requestInitialState();
+      });
+    }
+
+    function schedulePlanRender(payload) {
+      latestPlan = payload || "{}";
+      if (!map3d || renderScheduled) return;
+      renderScheduled = true;
+      requestAnimationFrame(() => {
+        renderScheduled = false;
+        try {
+          if (mapMode === "FLY") {
+            // The shared bridge owns the editable PLAN store, while Mission
+            // Map must render the independently loaded mission snapshot.
+            // Never let a PLAN notification overwrite TP/runtime routes.
+            flyPlanSignature = "";
+            renderState(JSON.parse(latestState || "{}"));
+          } else {
+            renderPlan(
+              JSON.parse(latestPlan || "{}"),
+              planSelectedVehicleId
+            );
+          }
+        } catch (error) {
+          document.getElementById("status").textContent = "MAP RENDER ERROR";
+          if (bridge) bridge.reportStatus(String(error));
+        }
+      });
+    }
+
+    function scheduleRender(payload) {
+      latestState = payload || "{}";
+      if (!map3d || renderScheduled) return;
+      renderScheduled = true;
+      requestAnimationFrame(() => {
+        renderScheduled = false;
+        try {
+          renderState(JSON.parse(latestState || "{}"));
+        } catch (error) {
+          document.getElementById("status").textContent = "MISSION MAP RENDER ERROR";
+          if (bridge) bridge.reportStatus(String(error));
+        }
+      });
+    }
+
+    window.setFlyState = payload => scheduleRender(payload || "{}");
+    window.setFlyPlan = payload => {
+      try {
+        latestFlyPlan = typeof payload === "string"
+          ? JSON.parse(payload || "{}")
+          : (payload || {});
+        flyPlanSignature = "";
+        if (mapMode === "FLY") scheduleRender(latestState);
+      } catch (error) {
+        document.getElementById("status").textContent =
+          "MISSION PLAN DATA ERROR";
+        if (bridge) bridge.reportStatus(String(error));
+      }
+    };
+    window.setPlanVehicleSelection = vehicleId => {
+      planSelectedVehicleId = Math.max(0, Math.min(6, Number(vehicleId || 0)));
+      if (mapMode === "PLAN") schedulePlanRender(latestPlan);
+    };
+    window.setMapMode = mode => {
+      mapMode = mode === "FLY" ? "FLY" : "PLAN";
+      flyPlanSignature = "";
+      const flyVisible = mapMode === "FLY";
+      document.getElementById("status").style.display = flyVisible ? "block" : "none";
+      document.getElementById("zoomPanel").style.display = flyVisible ? "flex" : "none";
+      document.getElementById("legend").style.display = flyVisible ? "block" : "none";
+      if (flyVisible) {
+        setRange(70000);
+        // Entering FLY: drop any PLAN-mode waypoint markers/routes (the pre-baked
+        // SPX waypoints) so they don't linger over the search disk at launch.
+        clearPlannedRoutes();
+        for (const [id, marker] of planMarkers) {
+          if (id !== "TP" && marker?.isConnected) { marker.remove(); planMarkers.delete(id); }
+        }
+        plannedRouteSignature = "";
+        scheduleRender(latestState);
+      } else {
+        setRange(6500);
+        clearPlannedRoutes();
+        planningGeometrySignature = "";
+        const empty = new Set();
+        removeStale(tacticalMarkers, empty);
+        removeStale(tacticalFrames, empty);
+        removeStale(headingLines, empty);
+        removeStale(planningFootprints, empty);
+        removeStale(planningBeliefs, empty);
+        if (rendezvousMarker?.isConnected) rendezvousMarker.remove();
+        if (rendezvousCrossA?.isConnected) rendezvousCrossA.remove();
+        if (rendezvousCrossB?.isConnected) rendezvousCrossB.remove();
+        if (rendezvousUncertainty?.isConnected) rendezvousUncertainty.remove();
+        if (shutdownMarker?.isConnected) shutdownMarker.remove();
+        if (loiterOrbit?.isConnected) loiterOrbit.remove();
+        if (loiterMarker?.isConnected) loiterMarker.remove();
+        if (emergencyReturnLine?.isConnected) emergencyReturnLine.remove();
+        for (const marker of planningRetiredMarkers.values()) {
+          if (marker?.isConnected) marker.remove();
+        }
+        planningRetiredMarkers.clear();
+        document.getElementById("status").textContent = "PLAN // GOOGLE 3D HYBRID ONLINE";
+        schedulePlanRender(latestPlan);
+      }
+    };
+    window.moveMapCamera = destination => {
+      if (!map3d || !destination) return false;
+      const latitude = Number(destination.latitude);
+      const longitude = Number(destination.longitude);
+      const altitude = Number(destination.altitude_m || 0);
+      if (![latitude, longitude, altitude].every(Number.isFinite)) return false;
+      map3d.center = {
+        lat: latitude,
+        lng: longitude,
+        altitude
+      };
+      cameraInitialized = true;
+      document.getElementById("status").textContent =
+        `PLAN // MAP CENTER ${latitude.toFixed(6)}, ${longitude.toFixed(6)} / ${altitude.toFixed(1)}M`;
+      return true;
+    };
+
+    function removeStale(collection, desired) {
+      for (const [id, element] of collection) {
+        if (!desired.has(id)) {
+          element.remove();
+          collection.delete(id);
+        }
+      }
+    }
+
+    function removeStalePlanMarkers(desired, animateWaypointReplacement = false) {
+      let deferredIndex = 0;
+      for (const [id, marker] of planMarkers) {
+        if (desired.has(id)) continue;
+        const isFlightWaypoint =
+          animateWaypointReplacement &&
+          mapMode === "FLY" &&
+          /UAV-\d{2}:WP\d+/.test(String(id));
+        if (!isFlightWaypoint) {
+          marker.remove();
+          planMarkers.delete(id);
+          continue;
+        }
+        const removalToken = Number(marker.removalToken || 0) + 1;
+        marker.removalToken = removalToken;
+        marker.style.transition = "opacity 850ms linear";
+        marker.style.opacity = "0";
+        if (marker.tacticalPin) {
+          marker.tacticalPin.style.transition = "opacity 850ms linear";
+          marker.tacticalPin.style.opacity = "0";
+        }
+        const delay = 900 + deferredIndex * 18;
+        deferredIndex += 1;
+        setTimeout(() => {
+          if (
+            marker.removalToken !== removalToken ||
+            planMarkers.get(id) !== marker
+          ) return;
+          if (marker.isConnected) marker.remove();
+          planMarkers.delete(id);
+        }, delay);
+      }
+    }
+
+    function upsertMarker(
+      collection, id, item, label, color, onClick = null, opacity = 1,
+      onContextMenu = null
+    ) {
+      let marker = collection.get(id);
+      if (!marker) {
+        marker = new maps3d.Marker3DInteractiveElement({
+          altitudeMode: "RELATIVE_TO_GROUND",
+          extruded: true,
+          sizePreserved: true,
+          title: id
+        });
+        marker.addEventListener("gmp-click", event => {
+          if (!marker.clickHandler) return;
+          event.stopPropagation();
+          marker.clickHandler();
+        });
+        marker.addEventListener("contextmenu", event => {
+          if (mapMode !== "FLY" || !marker.contextMenuHandler) return;
+          event.preventDefault();
+          event.stopPropagation();
+          mapContextHandled = true;
+          rightPointerPending = false;
+          marker.contextMenuHandler();
+        });
+        if (PinElementClass) {
+          const glyph = id.startsWith("PSN-") ? "P" :
+            (id.startsWith("UAV-") ? "UAV" : id.slice(0, 2));
+          marker.tacticalPin = new PinElementClass({
+            background: color,
+            borderColor: "#101712",
+            glyphColor: "#ffffff",
+            glyphText: glyph,
+            scale: id === "TP"
+              ? 1.16
+              : (id.startsWith("PSN-") || id.startsWith("UAV-") ? 0.92 : 0.78)
+          });
+          marker.append(marker.tacticalPin);
+        }
+        map3d.append(marker);
+        collection.set(id, marker);
+      }
+      marker.position = positionOf(item);
+      marker.label = label;
+      marker.title = id;
+      marker.clickHandler = onClick;
+      marker.contextMenuHandler = onContextMenu;
+      marker.style.opacity = String(opacity);
+      marker.style.transition = "";
+      marker.removalToken = Number(marker.removalToken || 0) + 1;
+      if (marker.tacticalPin) {
+        marker.tacticalPin.background = color;
+        marker.tacticalPin.style.opacity = String(opacity);
+      }
+      return marker;
+    }
+
+    function upsertTpMarker(item) {
+      let marker = planMarkers.get("TP");
+      if (!marker || !marker.tpPin) {
+        if (marker?.isConnected) marker.remove();
+        marker = new maps3d.Marker3DElement({
+          altitudeMode: "RELATIVE_TO_GROUND",
+          extruded: false,
+          sizePreserved: true,
+          title: "TP // 공통 집결점"
+        });
+        // Marker3DElement only renders a PinElement (or a template holding one)
+        // as slotted content; a raw <div> is rejected and never drawn.
+        if (PinElementClass) {
+          marker.tpPin = new PinElementClass({
+            background: "#55ff9a",
+            borderColor: "#06140a",
+            glyphColor: "#06140a",
+            glyphText: "TP",
+            scale: 1.2
+          });
+          marker.append(marker.tpPin);
+        }
+        marker.label = "TP // 공통 집결점";
+        planMarkers.set("TP", marker);
+        map3d.append(marker);
+      } else if (!marker.isConnected) {
+        map3d.append(marker);
+      }
+      marker.position = positionOf({...item, altitude_m: 15});
+      return marker;
+    }
+
+    function offsetPosition(item, eastM, northM) {
+      const latitude = Number(item.latitude);
+      const longitude = Number(item.longitude);
+      const lat = latitude + northM / 111320;
+      const scale = Math.max(10000, 111320 * Math.cos(latitude * Math.PI / 180));
+      return {
+        lat,
+        lng: longitude + eastM / scale,
+        altitude: Number(item.altitude_m || 0)
+      };
+    }
+
+    function rotatedOffsets(points, headingDeg) {
+      const angle = headingDeg * Math.PI / 180;
+      const sin = Math.sin(angle);
+      const cos = Math.cos(angle);
+      return points.map(([east, north]) => [
+        east * cos + north * sin,
+        -east * sin + north * cos
+      ]);
+    }
+
+    function upsertTacticalFrame(
+      id, item, kind, selected, trackId = null, muted = false,
+      teamColor = colors.UAV
+    ) {
+      let frame = tacticalFrames.get(id);
+      if (!frame) {
+        frame = new maps3d.Polygon3DInteractiveElement({
+          altitudeMode: "RELATIVE_TO_GROUND",
+          extruded: false,
+          geodesic: true,
+          strokeWidth: 3,
+          drawsOccludedSegments: true
+        });
+        if (trackId !== null) {
+          frame.addEventListener("gmp-click", event => {
+            event.stopPropagation();
+            if (bridge) bridge.reportSubjectSelected(Number(trackId));
+          });
+        }
+        map3d.append(frame);
+        tacticalFrames.set(id, frame);
+      }
+      const size = kind === "UAV" ? 58 : (selected ? 68 : 58);
+      const base = kind === "UAV"
+        ? [[0, size], [size * .72, -size * .65], [0, -size * .25], [-size * .72, -size * .65]]
+        : [[0, size], [size, 0], [0, -size], [-size, 0]];
+      const rotated = rotatedOffsets(base, Number(item.heading_deg || 0));
+      frame.path = rotated.map(([east, north]) => offsetPosition(item, east, north));
+      const color = kind === "UAV"
+        ? (muted ? withAlpha(teamColor, .24) : teamColor)
+        : (selected ? colors.SELECTED : colors[kind]);
+      frame.strokeColor = color;
+      frame.fillColor = kind === "UAV"
+        ? withAlpha(teamColor, muted ? .06 : (selected ? .32 : .20))
+        : (selected ? "rgba(255,191,56,.36)" : "rgba(255,83,75,.27)");
+    }
+
+    function upsertHeadingLine(id, item, color) {
+      let line = headingLines.get(id);
+      if (!line) {
+        line = new maps3d.Polyline3DElement({
+          altitudeMode: "RELATIVE_TO_GROUND",
+          geodesic: true,
+          strokeWidth: 3,
+          outerColor: "rgba(0,0,0,.8)",
+          outerWidth: 1,
+          drawsOccludedSegments: true
+        });
+        map3d.append(line);
+        headingLines.set(id, line);
+      }
+      const angle = Number(item.heading_deg || 0) * Math.PI / 180;
+      const length = id.startsWith("UAV-") ? 900 : 500;
+      line.path = [
+        positionOf(item),
+        offsetPosition(item, Math.sin(angle) * length, Math.cos(angle) * length)
+      ];
+      line.strokeColor = color;
+    }
+
+    function visibleWaypoints(plan, selectedVehicleId = null) {
+      const activeWaypoints = plan.waypoints || [];
+      if (selectedVehicleId === null) {
+        return activeWaypoints.map(waypoint => ({
+          ...waypoint,
+          marker_id: String(waypoint.code)
+        }));
+      }
+
+      const routes = Array.isArray(plan.vehicle_routes)
+        ? plan.vehicle_routes
+        : [];
+      const selectedId = Number(selectedVehicleId || 0);
+      const visibleRoutes = selectedId > 0
+        ? routes.filter(route => Number(route.vehicle_id) === selectedId)
+        : routes;
+      const waypoints = visibleRoutes.flatMap(route =>
+        (route.waypoints || []).map(waypoint => ({
+          ...waypoint,
+          vehicle_id: Number(route.vehicle_id),
+          vehicle_code: route.vehicle_code || `UAV-${String(route.vehicle_id).padStart(2, "0")}`,
+          marker_id: `${route.vehicle_code || route.vehicle_id}:${waypoint.code}`
+        }))
+      );
+
+      if (selectedId > 0) return waypoints;
+
+      const grouped = new Map();
+      for (const waypoint of waypoints) {
+        const key = [
+          waypoint.code,
+          Number(waypoint.latitude).toFixed(7),
+          Number(waypoint.longitude).toFixed(7),
+          Number(waypoint.altitude_m || 0).toFixed(1)
+        ].join(":");
+        const group = grouped.get(key) || [];
+        group.push(waypoint);
+        grouped.set(key, group);
+      }
+
+      const result = [];
+      for (const group of grouped.values()) {
+        if (group.length === visibleRoutes.length && visibleRoutes.length > 1) {
+          result.push({
+            ...group[0],
+            vehicle_code: "UAV-01~06",
+            marker_id: `FLEET:${group[0].code}`,
+            common_waypoint: true
+          });
+        } else {
+          result.push(...group);
+        }
+      }
+      return result;
+    }
+
+    function missionTp(plan) {
+      const mission = plan.mission || {};
+      const rp = mission.rally_predicted_subject;
+      if (rp && rp.latitude != null && rp.longitude != null) {
+        return {
+          latitude: Number(rp.latitude),
+          longitude: Number(rp.longitude),
+          altitude_m: Number(rp.altitude_m || mission.arc_search_pattern?.altitude_m || 0),
+          code: "TP",
+        };
+      }
+      return null;
+    }
+
+    function clearPlannedRoutes() {
+      for (const segments of plannedRouteSegments.values()) {
+        segments.forEach(record => record.element.remove());
+      }
+      plannedRouteSegments.clear();
+      plannedRouteSignature = "";
+      planningCandidateSignature = "";
+    }
+
+    function retirePlanningWaypoint(marker, color) {
+      if (!marker?.position || !maps3d || !map3d) return;
+      const retireId = `RHP-RETIRED-${retiredWaypointSequence++}`;
+      const retired = new maps3d.Marker3DElement({
+        altitudeMode: "RELATIVE_TO_GROUND",
+        extruded: false,
+        sizePreserved: true,
+        title: "이전 RHP 웨이포인트"
+      });
+      if (PinElementClass) {
+        retired.append(new PinElementClass({
+          background: color,
+          borderColor: "#0a1410",
+          glyphColor: "#0a1410",
+          scale: 0.5
+        }));
+      }
+      retired.position = marker.position;
+      planningRetiredMarkers.set(retireId, retired);
+      map3d.append(retired);
+      setTimeout(() => {
+        const current = planningRetiredMarkers.get(retireId);
+        if (current?.isConnected) current.remove();
+        planningRetiredMarkers.delete(retireId);
+      }, 1400);
+    }
+
+    function interpolateRoutePoint(start, end, fraction) {
+      return {
+        latitude: Number(start.latitude) +
+          (Number(end.latitude) - Number(start.latitude)) * fraction,
+        longitude: Number(start.longitude) +
+          (Number(end.longitude) - Number(start.longitude)) * fraction,
+        altitude_m: Number(start.altitude_m || 0) +
+          (Number(end.altitude_m || 0) - Number(start.altitude_m || 0)) * fraction
+      };
+    }
+
+    function routeDistanceM(start, end) {
+      const meanLatitude = (Number(start.latitude) + Number(end.latitude)) / 2;
+      const northM = (Number(end.latitude) - Number(start.latitude)) * 111320;
+      const eastM = (Number(end.longitude) - Number(start.longitude)) *
+        111320 * Math.cos(meanLatitude * Math.PI / 180);
+      return Math.hypot(eastM, northM);
+    }
+
+    function routeProgressFraction(start, end, current) {
+      const referenceLatitude = (
+        Number(start.latitude) + Number(end.latitude)
+      ) / 2;
+      const longitudeScale = 111320 * Math.cos(
+        referenceLatitude * Math.PI / 180
+      );
+      const segmentEast = (
+        Number(end.longitude) - Number(start.longitude)
+      ) * longitudeScale;
+      const segmentNorth = (
+        Number(end.latitude) - Number(start.latitude)
+      ) * 111320;
+      const currentEast = (
+        Number(current.longitude) - Number(start.longitude)
+      ) * longitudeScale;
+      const currentNorth = (
+        Number(current.latitude) - Number(start.latitude)
+      ) * 111320;
+      const lengthSquared = (
+        segmentEast * segmentEast + segmentNorth * segmentNorth
+      );
+      if (lengthSquared <= 1) return 0;
+      return Math.max(0, Math.min(1,
+        (currentEast * segmentEast + currentNorth * segmentNorth) /
+          lengthSquared
+      ));
+    }
+
+    function buildRouteMetrics(points) {
+      const segmentLengths = [];
+      const cumulative = [0];
+      for (let index = 0; index + 1 < points.length; index += 1) {
+        const length = routeDistanceM(points[index], points[index + 1]);
+        segmentLengths.push(length);
+        cumulative.push(cumulative[cumulative.length - 1] + length);
+      }
+      return {
+        segmentLengths,
+        cumulative,
+        totalDistanceM: cumulative[cumulative.length - 1] || 0
+      };
+    }
+
+    function routePointAtDistance(points, metrics, distanceM) {
+      const distance = Math.max(
+        0,
+        Math.min(Number(distanceM || 0), metrics.totalDistanceM)
+      );
+      let segmentIndex = Math.max(0, points.length - 2);
+      for (let index = 0; index < metrics.segmentLengths.length; index += 1) {
+        if (distance <= metrics.cumulative[index + 1]) {
+          segmentIndex = index;
+          break;
+        }
+      }
+      const segmentStart = metrics.cumulative[segmentIndex] || 0;
+      const segmentLength = Math.max(
+        1,
+        metrics.segmentLengths[segmentIndex] || 0
+      );
+      return interpolateRoutePoint(
+        points[segmentIndex],
+        points[segmentIndex + 1],
+        (distance - segmentStart) / segmentLength
+      );
+    }
+
+    function routeSlice(points, metrics, startDistanceM, endDistanceM) {
+      const start = Math.max(0, Number(startDistanceM || 0));
+      const end = Math.max(
+        start,
+        Math.min(Number(endDistanceM || 0), metrics.totalDistanceM)
+      );
+      const slice = [routePointAtDistance(points, metrics, start)];
+      for (let index = 1; index + 1 < points.length; index += 1) {
+        const vertexDistance = metrics.cumulative[index];
+        if (vertexDistance > start && vertexDistance < end) {
+          slice.push(points[index]);
+        }
+      }
+      slice.push(routePointAtDistance(points, metrics, end));
+      return slice.map(point => positionOf(point));
+    }
+
+    function routeProgressDistance(record, vehicle) {
+      if (!vehicle || !record || record.routePoints.length < 2) return 0;
+      const points = record.routePoints;
+      const metrics = record.routeMetrics;
+      if (record.approachRoute) {
+        let bestDistance = 0;
+        let bestOffset = Number.POSITIVE_INFINITY;
+        for (let index = 0; index + 1 < points.length; index += 1) {
+          const fraction = routeProgressFraction(
+            points[index], points[index + 1], vehicle
+          );
+          const projected = interpolateRoutePoint(
+            points[index], points[index + 1], fraction
+          );
+          const offset = routeDistanceM(projected, vehicle);
+          if (offset < bestOffset) {
+            bestOffset = offset;
+            bestDistance = metrics.cumulative[index] +
+              fraction * metrics.segmentLengths[index];
+          }
+        }
+        return bestDistance;
+      }
+      const completed = Math.max(
+        0,
+        Math.min(
+          Number(vehicle.completed_route_segment_count || 0),
+          points.length - 2
+        )
+      );
+      const fraction = routeProgressFraction(
+        points[completed], points[completed + 1], vehicle
+      );
+      return metrics.cumulative[completed] +
+        fraction * metrics.segmentLengths[completed];
+    }
+
+    function updatePlannedRouteProgress(vehicles) {
+      const vehicleById = new Map(
+        (vehicles || []).map(vehicle => [
+          Number(String(vehicle.code || "0").split("-").pop()),
+          vehicle
+        ])
+      );
+      for (const [vehicleId, records] of plannedRouteSegments.entries()) {
+        const vehicle = vehicleById.get(Number(vehicleId));
+        const launched = Boolean(vehicle?.mission_launched);
+        const awaitingTpCommit = Boolean(
+          records[0]?.precomputedRoute &&
+          (vehicle?.pending_runtime_route || []).length > 0
+        );
+        const progressDistanceM = launched &&
+          records.length > 0 &&
+          !records[0].manualRoutePreview &&
+          !awaitingTpCommit
+          ? routeProgressDistance(records[0], vehicle)
+          : 0;
+        for (const record of records) {
+          if (record.inactive) continue;
+          const visible = record.endDistanceM > progressDistanceM + 1;
+          if (!visible) {
+            if (record.progressSignature !== "HIDDEN") {
+              record.progressSignature = "HIDDEN";
+              if (record.element.isConnected) record.element.remove();
+            }
+            continue;
+          }
+          const visibleStart = Math.max(
+            record.startDistanceM,
+            progressDistanceM
+          );
+          const progressSignature = `VISIBLE:${Math.round(visibleStart / 5)}`;
+          if (record.progressSignature === progressSignature) continue;
+          record.progressSignature = progressSignature;
+          record.element.path = routeSlice(
+            record.routePoints,
+            record.routeMetrics,
+            visibleStart,
+            record.endDistanceM
+          );
+          if (!record.element.isConnected) map3d.append(record.element);
+        }
+      }
+    }
+
+    function renderPlannedRoutes(plan, selectedVehicleId, vehicles = []) {
+      if (mapMode !== "FLY") {
+        clearPlannedRoutes();
+        return;
+      }
+      const vehicleById = new Map(
+        (vehicles || []).map(vehicle => [
+          Number(String(vehicle.code || "0").split("-").pop()),
+          vehicle
+        ])
+      );
+      const hasManualPreviews = (vehicles || []).some(
+        vehicle => Boolean(vehicle.manual_route_preview_pending)
+      );
+      const routes = (plan.vehicle_routes || []).map(route => {
+        const vehicleId = Number(route.vehicle_id);
+        const vehicle = vehicleById.get(vehicleId);
+        const approachRoute = vehicle?.approach_route || [];
+        const manualRoute = vehicle?.manual_route_preview || [];
+        const runtimeRoute = vehicle?.runtime_route || [];
+        const pendingRuntimeRoute = vehicle?.pending_runtime_route || [];
+        if (approachRoute.length > 0) {
+          return {
+            ...route,
+            waypoints: approachRoute,
+            approach_route: true
+          };
+        }
+        if (manualRoute.length > 0) {
+          return {
+            ...route,
+            waypoints: manualRoute,
+            manual_route_preview: true
+          };
+        }
+        if (runtimeRoute.length === 0 && pendingRuntimeRoute.length > 0) {
+          return {
+            ...route,
+            waypoints: pendingRuntimeRoute,
+            pending_runtime_route: true
+          };
+        }
+        return runtimeRoute.length > 0
+          ? {...route, waypoints: runtimeRoute, runtime_route: true}
+          : route;
+      }).filter(route => (route.waypoints || []).length > 0);
+      const launcher = (plan.sites || []).find(site => site.code === "LC");
+      const selectedId = Number(selectedVehicleId || 0);
+      const signature = JSON.stringify([
+        selectedId,
+        Boolean(plan.pending_edit),
+        launcher,
+          routes.map(route => [
+          route.vehicle_id,
+          route.waypoints,
+          Boolean(route.approach_route)
+        ])
+      ]);
+      if (signature !== plannedRouteSignature) {
+        plannedRouteSignature = signature;
+        const desiredVehicleIds = new Set();
+
+        for (const route of routes) {
+          const vehicleId = Number(route.vehicle_id);
+          desiredVehicleIds.add(vehicleId);
+          const focused = selectedId > 0 && selectedId === vehicleId;
+          const muted = selectedId > 0 && !focused;
+          const baseColor = vehicleColor(vehicleId);
+          const preview = Boolean(route.manual_route_preview) ||
+            (!hasManualPreviews && Boolean(plan.pending_edit));
+          const routeVehicle = vehicleById.get(vehicleId);
+          const rallyPoint = missionTp(plan);
+          const points = [
+            ...(route.pending_runtime_route && rallyPoint
+              ? [rallyPoint]
+              : (
+                  (route.runtime_route || route.approach_route || route.manual_route_preview) && routeVehicle
+                    ? [routeVehicle]
+                    : (launcher ? [launcher] : [])
+                )),
+            ...(route.waypoints || [])
+          ];
+          const routeMetrics = buildRouteMetrics(points);
+          const previousSegments = plannedRouteSegments.get(vehicleId) || [];
+          const segments = [];
+          let segmentCursor = 0;
+          if (routeMetrics.totalDistanceM > 1) {
+            const dashCount = Math.max(
+              3,
+              Math.min(
+                ROUTE_DASH_POOL_SIZE,
+                Math.ceil(routeMetrics.totalDistanceM / 1800)
+              )
+            );
+            for (let dash = 0; dash < ROUTE_DASH_POOL_SIZE; dash += 1) {
+              const activeDash = dash < dashCount;
+              const startDistanceM =
+                activeDash
+                  ? routeMetrics.totalDistanceM * dash / dashCount
+                  : routeMetrics.totalDistanceM;
+              const endDistanceM = Math.min(
+                routeMetrics.totalDistanceM,
+                activeDash
+                  ? startDistanceM + routeMetrics.totalDistanceM / dashCount
+                  : routeMetrics.totalDistanceM
+              );
+              let segment = previousSegments[segmentCursor]?.element;
+              if (!segment) {
+                segment = new maps3d.Polyline3DElement({
+                  // Drape search routes on the ground so they read against the
+                  // ground-level search boundary ring. Drawing them at flight
+                  // altitude (600 m) parallax-shifts them outside the ring on a
+                  // tilted 3D camera even when their ground track is inside it.
+                  altitudeMode: "CLAMP_TO_GROUND",
+                  geodesic: true,
+                  drawsOccludedSegments: true
+                });
+              }
+              segment.strokeColor = withAlpha(
+                baseColor,
+                activeDash
+                  ? (
+                      preview
+                        ? (muted ? .08 : (focused ? .48 : .32))
+                        : (muted ? .18 : (focused ? .92 : .66))
+                    )
+                  : 0
+              );
+              segment.strokeWidth = activeDash ? (focused ? 3 : 2) : 1;
+              if (
+                activeDash ||
+                !previousSegments[segmentCursor]?.inactive
+              ) {
+                segment.path = routeSlice(
+                  points,
+                  routeMetrics,
+                  startDistanceM,
+                  endDistanceM
+                );
+              }
+              if (!segment.isConnected) map3d.append(segment);
+              segments.push({
+                element: segment,
+                routePoints: points,
+                routeMetrics,
+                startDistanceM,
+                endDistanceM,
+                approachRoute: Boolean(route.approach_route),
+                manualRoutePreview: Boolean(route.manual_route_preview),
+                precomputedRoute: Boolean(route.pending_runtime_route),
+                progressSignature: activeDash ? "" : "INACTIVE",
+                inactive: !activeDash
+              });
+              segmentCursor += 1;
+            }
+          }
+          previousSegments.slice(segmentCursor).forEach(record => {
+            if (record.element.isConnected) record.element.remove();
+          });
+          plannedRouteSegments.set(vehicleId, segments);
+        }
+        for (const [vehicleId, records] of plannedRouteSegments.entries()) {
+          if (desiredVehicleIds.has(Number(vehicleId))) continue;
+          records.forEach(record => {
+            if (record.element.isConnected) record.element.remove();
+          });
+          plannedRouteSegments.delete(vehicleId);
+        }
+      }
+      updatePlannedRouteProgress(vehicles);
+    }
+
+    function renderPlanRouteLines(plan, selectedVehicleId) {
+      const desired = new Set();
+      if (mapMode !== "PLAN") {
+        removeStale(planRouteLines, desired);
+        return;
+      }
+      const selectedId = Number(selectedVehicleId || 0);
+      const routes = (plan.vehicle_routes || []).filter(route =>
+        (route.waypoints || []).length > 0 &&
+        (selectedId === 0 || Number(route.vehicle_id) === selectedId)
+      );
+      const launcher = (plan.sites || []).find(site => site.code === "LC") ||
+        (plan.sites || []).find(site => site.code === "GCS");
+      for (const route of routes) {
+        const vehicleId = Number(route.vehicle_id);
+        const baseColor = vehicleColor(vehicleId);
+        const id = `PLAN-ROUTE-${vehicleId}`;
+        desired.add(id);
+        let line = planRouteLines.get(id);
+        if (!line) {
+          line = new maps3d.Polyline3DElement({
+            // Ground-draped so the PLAN route aligns with the ground-level
+            // search boundary ring (see the FLY route note above).
+            altitudeMode: "CLAMP_TO_GROUND",
+            geodesic: true,
+            strokeColor: withAlpha(
+              baseColor,
+              selectedId === 0 ? .68 : .96
+            ),
+            strokeWidth: selectedId === 0 ? 2 : 3,
+            outerColor: "rgba(0,0,0,.72)",
+            outerWidth: 1,
+            drawsOccludedSegments: true
+          });
+          map3d.append(line);
+          planRouteLines.set(id, line);
+        } else if (!line.isConnected) {
+          map3d.append(line);
+        }
+        line.strokeColor = withAlpha(
+          baseColor,
+          selectedId === 0 ? .68 : .96
+        );
+        line.strokeWidth = selectedId === 0 ? 2 : 3;
+        line.path = [
+          ...(launcher ? [positionOf(launcher)] : []),
+          ...(route.waypoints || []).map(point => positionOf(point))
+        ];
+      }
+      removeStale(planRouteLines, desired);
+    }
+
+    function renderPlan(plan, selectedVehicleId = null, vehicles = []) {
+      const sites = plan.sites || [];
+      const initialSubjects = plan.initial_subjects || [];
+      const dynamicVehicleIds = new Set(
+        (vehicles || [])
+          .filter(vehicle =>
+            (vehicle.approach_route || []).length > 0 ||
+            (vehicle.runtime_route || []).length > 0
+          )
+          .map(vehicle => Number(String(vehicle.code || "0").split("-").pop()))
+      );
+      const selectedId = Number(selectedVehicleId || 0);
+      let waypoints = visibleWaypoints(plan, selectedVehicleId);
+      if (mapMode === "FLY") {
+        waypoints = selectedId > 0 && !dynamicVehicleIds.has(selectedId)
+          ? waypoints.filter(waypoint => waypoint.code !== "WP001")
+          : [];
+      }
+      const returnPoint = plan.return_point || null;
+      const zones = plan.zones || [];
+      const markerIds = new Set();
+
+      for (const site of sites) {
+        markerIds.add(String(site.code));
+        upsertMarker(
+          planMarkers, String(site.code), site,
+          `${site.code} // ${site.label}`, colors[site.code] || "#fff",
+          () => bridge && bridge.reportFeatureSelected(String(site.code))
+        );
+      }
+      if (mapMode === "FLY") {
+        const tp = missionTp(plan);
+        if (tp) {
+          markerIds.add("TP");
+          upsertTpMarker(tp);
+        }
+      }
+      if (mapMode === "PLAN") {
+        for (const subj of initialSubjects) {
+          const subjCode = `SAR-PSN-${Number(subj.track_id)}`;
+          markerIds.add(subjCode);
+          upsertMarker(
+            planMarkers,
+            subjCode,
+            subj,
+            `TARGET GPS // ${(subj.subject_type || "TARGET").replace(/MISSING_PERSON\w*/g, "TARGET")} ` +
+              `PSN-${Number(subj.track_id)} / ` +
+              `${(Number(subj.speed_mps || 0) * 3.6).toFixed(0)}KM/H`,
+            colors.SUBJECT
+          );
+        }
+      }
+      for (const waypoint of waypoints) {
+        const markerId = String(waypoint.marker_id || waypoint.code);
+        markerIds.add(markerId);
+        const vehicleCode = waypoint.vehicle_code || plan.active_vehicle_code;
+        const waypointVehicleId = Number(
+          waypoint.vehicle_id || String(vehicleCode || "0").split("-").pop()
+        );
+        const waypointColor = waypoint.common_waypoint
+          ? colors.WAYPOINT
+          : vehicleColor(waypointVehicleId);
+        const waypointLabel = waypoint.common_waypoint
+          ? (
+              waypoint.code === "WP001"
+                ? `TP / ${vehicleCode} / ${waypoint.code} // 공통 집결점`
+                : `${vehicleCode} / ${waypoint.code} // 공통 웨이포인트`
+            )
+          : (
+              `${vehicleCode ? `${vehicleCode} / ` : ""}${waypoint.code}` +
+              (waypoint.pending_preview ? " // 수정 대기" : "")
+            );
+        const contextOwner = waypoint.common_waypoint
+          ? "FLEET"
+          : String(waypointVehicleId);
+        const waypointContextKey = `${contextOwner}:${waypoint.code}`;
+        const waypointOpacity = waypoint.pending_preview
+          ? .30
+          : (
+              mapMode === "FLY"
+                ? (waypoint.common_waypoint
+                    ? .82
+                    : (dynamicVehicleIds.has(waypointVehicleId) ? .26 : .52))
+                : 1
+            );
+        upsertMarker(
+          planMarkers, markerId, waypoint,
+          `${waypointLabel} / ${Number(waypoint.altitude_m).toFixed(0)}M`,
+          waypointColor,
+          () => {
+            if (mapMode === "PLAN" && planSelectedVehicleId === 0) return;
+            if (bridge) bridge.reportFeatureSelected(String(waypoint.code));
+          },
+          waypointOpacity,
+          () => {
+            if (mapMode !== "FLY" || !bridge) return;
+            bridge.reportFeatureRightClick(
+              waypointContextKey,
+              Number(waypoint.latitude),
+              Number(waypoint.longitude),
+              Number(waypoint.altitude_m || 0)
+            );
+          }
+        );
+      }
+      if (returnPoint) {
+        markerIds.add("RTB");
+        upsertMarker(
+          planMarkers, "RTB", returnPoint, "RTB // 복귀지점", colors.RETURN,
+          () => bridge && bridge.reportFeatureSelected("RTB")
+        );
+      }
+      if (
+        mapMode === "FLY" &&
+        selectedId > 0 &&
+        dynamicVehicleIds.has(selectedId)
+      ) {
+        const retiringWaypoints = Array.from(planMarkers.entries()).filter(
+          ([id]) => /UAV-\d{2}:WP\d+/.test(String(id)) && !markerIds.has(id)
+        );
+        const representativeIndexes = new Set([
+          0,
+          Math.floor((retiringWaypoints.length - 1) / 2),
+          retiringWaypoints.length - 1
+        ]);
+        retiringWaypoints.forEach(([_id, marker], index) => {
+          if (representativeIndexes.has(index)) {
+            retirePlanningWaypoint(marker, vehicleColor(selectedId));
+          }
+        });
+      }
+      removeStalePlanMarkers(
+        markerIds,
+        selectedId > 0 && dynamicVehicleIds.has(selectedId)
+      );
+
+      renderPlanRouteLines(plan, selectedVehicleId);
+
+      const zoneIds = new Set();
+      for (const zone of zones) {
+        const id = String(zone.code);
+        zoneIds.add(id);
+        let polygon = zonePolygons.get(id);
+        if (!polygon) {
+          polygon = new maps3d.Polygon3DElement({
+            altitudeMode: "CLAMP_TO_GROUND", geodesic: true,
+            strokeColor: colors.SAFE, strokeWidth: 3,
+            fillColor: "rgba(45,220,100,.18)", drawsOccludedSegments: true
+          });
+          map3d.append(polygon);
+          zonePolygons.set(id, polygon);
+        }
+        polygon.path = (zone.vertices || []).map(positionOf);
+      }
+      removeStale(zonePolygons, zoneIds);
+      renderIngressCorridor(plan);
+      renderPlannedRoutes(plan, selectedVehicleId, vehicles);
+    }
+
+    function renderIngressCorridor(plan) {
+      // Corridor outline removed per operator request — the blue parallelogram
+      // read as a confusing box on the map. The corridor is still used
+      // server-side to exclude the already-swept strip from the search.
+      if (ingressCorridorPolygon && ingressCorridorPolygon.isConnected) {
+        ingressCorridorPolygon.remove();
+      }
+      ingressCorridorPolygon = null;
+    }
+
+    function renderTactical(state) {
+      const desiredMarkers = new Set();
+      const desiredFrames = new Set();
+      const desiredLines = new Set();
+      const vehicles = state.vehicles || (state.vehicle ? [state.vehicle] : []);
+      const vehicle = state.vehicle;
+      const selectedVehicleId = Number(state.selected_vehicle_id || 0);
+
+      for (const fleetVehicle of vehicles) {
+        const vehicleNumber = Number(String(fleetVehicle.code).split("-").pop());
+        const active = selectedVehicleId > 0 && selectedVehicleId === vehicleNumber;
+        const muted = selectedVehicleId > 0 && !active;
+        const baseVehicleColor = vehicleColor(vehicleNumber);
+        const displayedVehicleColor = muted
+          ? withAlpha(baseVehicleColor, .28)
+          : baseVehicleColor;
+        const vehicleId = String(fleetVehicle.code);
+        desiredMarkers.add(vehicleId);
+        desiredFrames.add(vehicleId);
+        desiredLines.add(vehicleId);
+        upsertMarker(
+          tacticalMarkers, vehicleId, fleetVehicle,
+          `▲ ${fleetVehicle.code} / ${Number(fleetVehicle.speed_mps).toFixed(1)}M/S / ${fleetVehicle.flight_phase || "STANDBY"}`,
+          displayedVehicleColor
+        );
+        upsertTacticalFrame(
+          vehicleId,
+          fleetVehicle,
+          "UAV",
+          active,
+          null,
+          muted,
+          baseVehicleColor
+        );
+        upsertHeadingLine(vehicleId, fleetVehicle, displayedVehicleColor);
+        const path = fleetVehicle.flight_path || [];
+        const lastPathPoint = path.length > 0 ? path[path.length - 1] : null;
+        const pathSignature = JSON.stringify([
+          path.length,
+          lastPathPoint
+            ? [
+                Number(lastPathPoint.latitude).toFixed(7),
+                Number(lastPathPoint.longitude).toFixed(7)
+              ]
+            : null,
+          active,
+          muted
+        ]);
+        if (flightPathSignatures.get(vehicleId) !== pathSignature) {
+          flightPathSignatures.set(vehicleId, pathSignature);
+          const existingSegments = flightPathSegments.get(vehicleId) || [];
+          if (path.length >= 2) {
+            const segCount = Math.min(
+              TRAIL_FADE_SEGMENTS,
+              Math.max(1, path.length - 1)
+            );
+            let usedCount = 0;
+            for (let si = 0; si < segCount; si += 1) {
+              const startIdx = Math.round(
+                si * (path.length - 1) / segCount
+              );
+              const endIdx = Math.min(
+                Math.round((si + 1) * (path.length - 1) / segCount) + 1,
+                path.length
+              );
+              const segPoints = path.slice(startIdx, endIdx);
+              if (segPoints.length < 2) continue;
+              const t = segCount === 1 ? 1 : si / (segCount - 1);
+              // Already-traversed track: neutral GREY that gets lighter (more
+              // transparent) with age and fades out — the oldest segment is
+              // nearly gone, the freshest (nearest the vehicle) is clearest.
+              const alpha = muted
+                ? .03 + t * .10
+                : (active ? .06 + t * .40 : .05 + t * .26);
+              const width = active ? (1.5 + t * 1.5) : (1 + t * 1);
+              let trail = existingSegments[usedCount];
+              if (!trail) {
+                trail = new maps3d.Polyline3DElement({
+                  altitudeMode: "RELATIVE_TO_GROUND",
+                  geodesic: true,
+                  drawsOccludedSegments: true
+                });
+                existingSegments.push(trail);
+              }
+              trail.strokeColor = `rgba(184,188,192,${alpha.toFixed(3)})`;
+              trail.strokeWidth = width;
+              trail.path = segPoints.map(point => positionOf(point));
+              if (!trail.isConnected) map3d.append(trail);
+              usedCount += 1;
+            }
+            for (let j = usedCount; j < existingSegments.length; j += 1) {
+              if (existingSegments[j].isConnected) existingSegments[j].remove();
+            }
+            flightPathSegments.set(
+              vehicleId,
+              existingSegments.slice(0, usedCount)
+            );
+          } else {
+            existingSegments.forEach(segment => segment.remove());
+            flightPathSegments.set(vehicleId, []);
+          }
+        }
+        if (!cameraInitialized) {
+          map3d.center = {
+            lat: Number(fleetVehicle.latitude),
+            lng: Number(fleetVehicle.longitude),
+            altitude: 250
+          };
+          cameraInitialized = true;
+        }
+      }
+
+      for (const subject of (state.subjects || [])) {
+        const id = String(subject.code);
+        const selected = Boolean(subject.selected);
+        const color = subject.found ? "#7f2824" :
+          (selected ? colors.SELECTED : colors.SUBJECT);
+        const etaSeconds = Number(subject.eta_s || 0);
+        const etaMinutes = Math.floor(etaSeconds / 60);
+        const etaRemainder = Math.floor(etaSeconds % 60);
+        const etaText = `${String(etaMinutes).padStart(2, "0")}:${String(etaRemainder).padStart(2, "0")}`;
+        desiredMarkers.add(id);
+        desiredFrames.add(id);
+        desiredLines.add(id);
+        upsertMarker(
+          tacticalMarkers, id, subject,
+          `${subject.found ? "X" : (selected ? "◆" : "◇")} ${(subject.subject_type || "TARGET").replace(/MISSING_PERSON\w*/g, "TARGET")}-${subject.country || "--"} ${id} / ${(Number(subject.distance_m || 0) / 1000).toFixed(1)}KM / ETA ${etaText}`,
+          color,
+          () => bridge && bridge.reportFeatureSelected(id)
+        );
+        upsertTacticalFrame(id, subject, "SUBJECT", selected, null);
+        upsertHeadingLine(id, subject, color);
+      }
+      removeStale(tacticalMarkers, desiredMarkers);
+      removeStale(tacticalFrames, desiredFrames);
+      removeStale(headingLines, desiredLines);
+
+      if (rendezvousMarker?.isConnected) rendezvousMarker.remove();
+      if (rendezvousCrossA?.isConnected) rendezvousCrossA.remove();
+      if (rendezvousCrossB?.isConnected) rendezvousCrossB.remove();
+      if (rendezvousUncertainty?.isConnected) rendezvousUncertainty.remove();
+
+      const loiter = state.guidance_orbit;
+      if (loiter) {
+        if (!loiterOrbit) {
+          loiterOrbit = new maps3d.Polygon3DElement({
+            altitudeMode: "RELATIVE_TO_GROUND",
+            extruded: false,
+            geodesic: true,
+            strokeColor: "rgba(77,179,255,.95)",
+            strokeWidth: 4,
+            fillColor: "rgba(77,179,255,.06)",
+            drawsOccludedSegments: true
+          });
+          map3d.append(loiterOrbit);
+        } else if (!loiterOrbit.isConnected) {
+          map3d.append(loiterOrbit);
+        }
+        const orbitPath = [];
+        const orbitRadius = Number(loiter.radius_m || 1200);
+        for (let index = 0; index < 56; index += 1) {
+          const angle = index / 56 * Math.PI * 2;
+          orbitPath.push(offsetPosition(
+            loiter,
+            Math.sin(angle) * orbitRadius,
+            Math.cos(angle) * orbitRadius
+          ));
+        }
+        loiterOrbit.path = orbitPath;
+        if (!loiterMarker) {
+          loiterMarker = new maps3d.Marker3DElement({
+            altitudeMode: "RELATIVE_TO_GROUND",
+            extruded: true,
+            sizePreserved: true,
+            title: "초기접근 선회 중심"
+          });
+          if (PinElementClass) {
+            loiterMarker.append(new PinElementClass({
+              background: "#4db3ff",
+              borderColor: "#07100d",
+              glyphColor: "#07100d",
+              glyphText: "O",
+              scale: .72
+            }));
+          }
+          map3d.append(loiterMarker);
+        } else if (!loiterMarker.isConnected) {
+          map3d.append(loiterMarker);
+        }
+        loiterMarker.position = positionOf(loiter);
+        loiterMarker.label =
+          `초기접근 선회 ${loiter.waypoint_code || "WP"} / R${(orbitRadius / 1000).toFixed(1)}KM / ${Number(loiter.speed_mps || 100).toFixed(0)}M/S`;
+      } else {
+        if (loiterOrbit?.isConnected) loiterOrbit.remove();
+        if (loiterMarker?.isConnected) loiterMarker.remove();
+      }
+
+      const emergencyReturn = state.emergency_return;
+      const mitlReturn = state.mitl_return;
+      if ((emergencyReturn || mitlReturn) && vehicle) {
+        if (!emergencyReturnLine) {
+          emergencyReturnLine = new maps3d.Polyline3DElement({
+            altitudeMode: "RELATIVE_TO_GROUND",
+            geodesic: true,
+            strokeColor: "#ff9d32",
+            strokeWidth: 5,
+            outerColor: "rgba(0,0,0,.85)",
+            outerWidth: 2,
+            drawsOccludedSegments: true
+          });
+          map3d.append(emergencyReturnLine);
+        } else if (!emergencyReturnLine.isConnected) {
+          map3d.append(emergencyReturnLine);
+        }
+        const returnPath = [positionOf(vehicle)];
+        if (mitlReturn?.via_waypoint) {
+          returnPath.push(positionOf(mitlReturn.via_waypoint));
+        }
+        returnPath.push(
+          positionOf(mitlReturn?.safe_zone || emergencyReturn)
+        );
+        emergencyReturnLine.path = returnPath;
+      } else if (emergencyReturnLine?.isConnected) {
+        emergencyReturnLine.remove();
+      }
+
+      const shutdown = state.shutdown_marker;
+      if (shutdown) {
+        if (!shutdownMarker) {
+          shutdownMarker = new maps3d.Marker3DElement({
+            altitudeMode: "RELATIVE_TO_GROUND",
+            extruded: true,
+            sizePreserved: true,
+            title: "SHUT DOWN"
+          });
+          if (PinElementClass) {
+            shutdownMarker.append(new PinElementClass({
+              background: "#ff4e47",
+              borderColor: "#3a0806",
+              glyphColor: "#ffffff",
+              glyphText: "✕",
+              scale: 1.0
+            }));
+          }
+          shutdownMarker.label = "SHUT DOWN";
+          map3d.append(shutdownMarker);
+        } else if (!shutdownMarker.isConnected) {
+          map3d.append(shutdownMarker);
+        }
+        shutdownMarker.position = positionOf(shutdown);
+      } else if (shutdownMarker?.isConnected) {
+        shutdownMarker.remove();
+      }
+    }
+
+    function renderPlanning(state) {
+      const planning = state.planning || {};
+      const vehicles = state.vehicles || [];
+      const vehicleById = new Map(
+        vehicles.map(vehicle => [
+          Number(String(vehicle.code || "0").split("-").pop()),
+          vehicle
+        ])
+      );
+      const selectedId = Number(state.selected_vehicle_id || 0);
+      const selectedVehicle = vehicleById.get(selectedId);
+      const manualPreviewPending = Boolean(
+        selectedVehicle?.manual_route_preview_pending
+      );
+      const manualPreview = selectedVehicle?.manual_route_preview || [];
+      const runtimeWaypoints = selectedId > 0
+        ? (
+            manualPreviewPending
+              ? manualPreview
+              : (selectedVehicle?.runtime_route || [])
+          )
+        : [];
+      const runtimeRevision = Number(
+        selectedVehicle?.runtime_route_revision || 0
+      );
+      const runtimeUpdateCount = Number(
+        selectedVehicle?.runtime_route_update_count || 0
+      );
+      const manualRouteActive = Boolean(selectedVehicle?.manual_route_active);
+      const manualHoldRemainingS = Number(
+        selectedVehicle?.manual_route_hold_remaining_s || 0
+      );
+      const candidateSignature = JSON.stringify([
+        selectedId,
+        runtimeRevision,
+        runtimeUpdateCount,
+        manualPreviewPending,
+        manualRouteActive,
+        Math.ceil(manualHoldRemainingS / 5),
+        runtimeWaypoints
+      ]);
+      if (candidateSignature !== planningCandidateSignature) {
+        planningCandidateSignature = candidateSignature;
+        const candidateLineIds = new Set();
+        const candidateMarkerIds = new Set();
+        if (selectedVehicle && runtimeWaypoints.length > 0) {
+          const color = vehicleColor(selectedId);
+          const representativeIndexes = new Set([
+            0,
+            Math.floor((runtimeWaypoints.length - 1) / 2),
+            runtimeWaypoints.length - 1
+          ]);
+          runtimeWaypoints.forEach((waypoint, index) => {
+          const markerId = `AUTO-CANDIDATE-${selectedId}-${index}`;
+          candidateMarkerIds.add(markerId);
+          let marker = planningCandidateMarkers.get(markerId);
+          const previousPosition = marker?.position
+            ? {
+                lat: Number(marker.position.lat),
+                lng: Number(marker.position.lng),
+                altitude: Number(marker.position.altitude || 600)
+              }
+            : null;
+          if (!marker) {
+            marker = new maps3d.Marker3DElement({
+              altitudeMode: "RELATIVE_TO_GROUND",
+              extruded: false,
+              sizePreserved: true,
+              title: markerId
+            });
+            marker.addEventListener("contextmenu", event => {
+              if (!marker.contextMenuHandler) return;
+              event.preventDefault();
+              event.stopPropagation();
+              mapContextHandled = true;
+              rightPointerPending = false;
+              marker.contextMenuHandler();
+            });
+            // Marker3DElement renders a PinElement, not raw <div> content.
+            if (PinElementClass) {
+              marker.autoPin = new PinElementClass({
+                background: color,
+                borderColor: "#0a1410",
+                glyphColor: "#eafff0",
+                scale: 0.5
+              });
+              marker.append(marker.autoPin);
+            }
+            planningCandidateMarkers.set(markerId, marker);
+            map3d.append(marker);
+          } else if (!marker.isConnected) {
+            map3d.append(marker);
+          }
+          const representative = representativeIndexes.has(index);
+          const waypointMoved = Boolean(
+            previousPosition &&
+            (
+              Math.abs(previousPosition.lat - Number(waypoint.latitude)) > 1e-7 ||
+              Math.abs(previousPosition.lng - Number(waypoint.longitude)) > 1e-7
+            )
+          );
+          if (waypointMoved) retirePlanningWaypoint(marker, color);
+          marker.position = positionOf(waypoint);
+          if (marker.autoPin) {
+            marker.autoPin.background = color;
+            marker.autoPin.borderColor =
+              (manualPreviewPending || manualRouteActive) ? "#f5f0d0" : "#0a1410";
+            marker.autoPin.scale = representative ? 0.74 : 0.5;
+          }
+          const routeStateText = manualPreviewPending
+            ? "MANUAL 수정 대기"
+            : (
+                manualRouteActive
+                  ? (
+                      manualHoldRemainingS > 0
+                        ? `MANUAL HOLD ${Math.ceil(manualHoldRemainingS)}S`
+                        : "MANUAL / RHP 복귀 대기"
+                    )
+                  : `RHP UPDATE ${runtimeUpdateCount} · REV ${runtimeRevision}`
+              );
+          const waypointText =
+            `UAV-${String(selectedId).padStart(2, "0")} / ${routeStateText} / ` +
+            `${waypoint.code || `WP${index + 1}`} / ` +
+            `${Number(waypoint.latitude).toFixed(5)}, ` +
+            `${Number(waypoint.longitude).toFixed(5)}`;
+          // Only the representative waypoint shows a text label, so the map is
+          // not cluttered with one label per RHP waypoint.
+          marker.label = representative ? waypointText : "";
+          marker.contextMenuHandler = () => {
+            if (!bridge || mapMode !== "FLY") return;
+            bridge.reportFeatureRightClick(
+              `AUTO:${selectedId}:${index}`,
+              Number(waypoint.latitude),
+              Number(waypoint.longitude),
+              Number(waypoint.altitude_m || 600)
+            );
+          };
+        });
+        }
+        if (selectedId > 0) {
+          for (const [markerId, marker] of planningCandidateMarkers.entries()) {
+            if (!candidateMarkerIds.has(markerId)) {
+              retirePlanningWaypoint(marker, vehicleColor(selectedId));
+            }
+          }
+        } else {
+          for (const marker of planningRetiredMarkers.values()) {
+            if (marker?.isConnected) marker.remove();
+          }
+          planningRetiredMarkers.clear();
+        }
+        removeStale(planningCandidateLines, candidateLineIds);
+        removeStale(planningCandidateMarkers, candidateMarkerIds);
+      }
+
+      const planner = planning.planner || {};
+      const searchCenter = planner.search_center;
+      const searchRadiusM = Number(planner.search_radius_m || 0);
+      const searchRadiusExpectedM = Number(planner.search_radius_expected_m || 0);
+      const searchSignature = searchCenter && searchRadiusM > 0
+        ? JSON.stringify([
+            Number(searchCenter.latitude).toFixed(7),
+            Number(searchCenter.longitude).toFixed(7),
+            searchRadiusM.toFixed(1),
+            searchRadiusExpectedM.toFixed(1)
+          ])
+        : "";
+      if (searchSignature !== planningSearchSignature) {
+        planningSearchSignature = searchSignature;
+        for (const ring of planningSearchRings) {
+          if (ring?.isConnected) ring.remove();
+        }
+        planningSearchRings.length = 0;
+        if (planningSearchMarker?.isConnected) planningSearchMarker.remove();
+        planningSearchMarker = null;
+        if (searchCenter && searchRadiusM > 0) {
+          // Outer ring = planning-max reach (subject could be anywhere up to
+          // subject_max_speed): very light yellow, thin.
+          const outer = new maps3d.Polyline3DElement({
+            altitudeMode: "RELATIVE_TO_GROUND",
+            geodesic: true,
+            strokeColor: "rgba(255,226,130,.34)",
+            strokeWidth: 2,
+            drawsOccludedSegments: true
+          });
+          outer.path = geographicCircle(searchCenter, searchRadiusM);
+          planningSearchRings.push(outer);
+          map3d.append(outer);
+          // Inner ring = reach at the subject's OWN average speed (the most
+          // likely extent): deep/dark yellow, bold.
+          if (searchRadiusExpectedM > 0) {
+            const inner = new maps3d.Polyline3DElement({
+              altitudeMode: "RELATIVE_TO_GROUND",
+              geodesic: true,
+              strokeColor: "rgba(232,170,18,.95)",
+              strokeWidth: 3,
+              drawsOccludedSegments: true
+            });
+            inner.path = geographicCircle(searchCenter, searchRadiusExpectedM);
+            planningSearchRings.push(inner);
+            map3d.append(inner);
+          }
+        }
+      }
+
+      const geometrySignature = JSON.stringify([
+        Number(planning.revision || 0),
+        selectedId,
+        Number((planning.footprints || []).length),
+        Number((planning.beliefs || []).length)
+      ]);
+      if (geometrySignature !== planningGeometrySignature) {
+      planningGeometrySignature = geometrySignature;
+      const footprintIds = new Set();
+      const visibleFootprints = selectedId > 0
+        ? (planning.footprints || []).filter(
+            footprint => Number(footprint.vehicle_id || 0) === selectedId
+          )
+        : [];
+      for (const footprint of visibleFootprints) {
+        const vehicleId = Number(footprint.vehicle_id || 0);
+        const id = `SEARCH-CAM-${vehicleId}`;
+        footprintIds.add(id);
+        let polygon = planningFootprints.get(id);
+        if (!polygon) {
+          const color = vehicleColor(vehicleId);
+          polygon = new maps3d.Polygon3DElement({
+            altitudeMode: "RELATIVE_TO_GROUND",
+            extruded: false,
+            geodesic: true,
+            strokeColor: withAlpha(color, .72),
+            strokeWidth: 2,
+            fillColor: withAlpha(color, .10),
+            drawsOccludedSegments: true
+          });
+          planningFootprints.set(id, polygon);
+          map3d.append(polygon);
+        } else if (!polygon.isConnected) {
+          map3d.append(polygon);
+        }
+        const radiusM = Math.max(5, Number(footprint.radius_m || 5));
+        const path = [];
+        for (let index = 0; index < 28; index += 1) {
+          const angle = index / 28 * Math.PI * 2;
+          path.push(offsetPosition(
+            footprint,
+            Math.sin(angle) * radiusM,
+            Math.cos(angle) * radiusM
+          ));
+        }
+        polygon.path = path;
+      }
+      removeStale(planningFootprints, footprintIds);
+
+      const beliefIds = new Set();
+      // Belief uncertainty ellipse removed per operator request: it read as a
+      // confusing third yellow circle next to the two reachability rings (the
+      // outer planning-max ring and the inner subject-average-speed ring).
+      const visibleBeliefs = [];
+      for (const belief of visibleBeliefs) {
+        const id = `BELIEF-${Number(belief.track_id || 0)}`;
+        beliefIds.add(id);
+        let polygon = planningBeliefs.get(id);
+        if (!polygon) {
+          polygon = new maps3d.Polygon3DElement({
+            altitudeMode: "RELATIVE_TO_GROUND",
+            extruded: false,
+            geodesic: true,
+            strokeColor: "rgba(255,191,56,.62)",
+            strokeWidth: 2,
+            fillColor: "rgba(255,191,56,.055)",
+            drawsOccludedSegments: true
+          });
+          planningBeliefs.set(id, polygon);
+          map3d.append(polygon);
+        } else if (!polygon.isConnected) {
+          map3d.append(polygon);
+        }
+        const eastRadius = Math.max(
+          20, Math.min(5000, Number(belief.uncertainty_east_95_m || 20))
+        );
+        const northRadius = Math.max(
+          20, Math.min(5000, Number(belief.uncertainty_north_95_m || 20))
+        );
+        const path = [];
+        for (let index = 0; index < 36; index += 1) {
+          const angle = index / 36 * Math.PI * 2;
+          path.push(offsetPosition(
+            belief,
+            Math.cos(angle) * eastRadius,
+            Math.sin(angle) * northRadius
+          ));
+        }
+        polygon.path = path;
+      }
+      removeStale(planningBeliefs, beliefIds);
+      }
+    }
+
+    function renderState(state) {
+      if (mapMode !== "FLY") return;
+      if (state.plan && Object.keys(state.plan).length > 0) {
+        latestFlyPlan = state.plan;
+      }
+      const planSignature = JSON.stringify([
+        Number(state.plan_revision || 0),
+        Number(state.selected_vehicle_id || 0),
+        (state.vehicles || []).map(vehicle => [
+          vehicle.code,
+          Number(vehicle.runtime_route_revision || 0),
+          Number(vehicle.pending_runtime_route_revision || 0),
+          Number((vehicle.approach_route || []).length),
+          Number((vehicle.runtime_route || []).length),
+          Number((vehicle.pending_runtime_route || []).length),
+          Boolean(vehicle.manual_route_preview_pending)
+        ])
+      ]);
+      if (planSignature !== flyPlanSignature) {
+        flyPlanSignature = planSignature;
+        renderPlan(
+          latestFlyPlan,
+          state.selected_vehicle_id ?? 0,
+          state.vehicles || []
+        );
+      }
+      updatePlannedRouteProgress(state.vehicles || []);
+      renderTactical(state);
+      renderPlanning(state);
+      const selected = state.selected_track_id ? `PSN-${state.selected_track_id}` : "NONE";
+      const planning = state.planning || {};
+      const plannerText = Number.isFinite(Number(planning.calculation_ms))
+        ? ` // RHP-PF R${Number(planning.revision || 0)} ${Number(planning.calculation_ms).toFixed(0)}MS`
+        : "";
+      var pdText = "";
+      if (state.spx_pd != null && Number.isFinite(state.spx_pd)) {
+        pdText = ` // SPX PD ${(state.spx_pd * 100).toFixed(1)}%`;
+      }
+      document.getElementById("status").textContent =
+        `MISSION MAP // ${state.flight_phase || "STANDBY"} // SELECTED ${selected}${pdText}${plannerText}`;
+    }
+
+    function setRange(value) {
+      currentRange = Math.max(700, Math.min(220000, value));
+      if (map3d) map3d.range = currentRange;
+      const gridKm = currentRange / 4 / 1000;
+      document.getElementById("gridDistance").textContent =
+        `격자 ${gridKm.toFixed(gridKm < 1 ? 2 : 1).padStart(5, "0")} km`;
+    }
+    document.getElementById("zoomIn").addEventListener("click", () => setRange(currentRange * .72));
+    document.getElementById("zoomOut").addEventListener("click", () => setRange(currentRange * 1.38));
+
+    function projectedMapPosition(clientX, clientY, bounds) {
+      const center = map3d.center;
+      const normalizedX = (
+        clientX - bounds.left - bounds.width / 2
+      ) / Math.max(1, bounds.width / 2);
+      const normalizedY = (
+        bounds.height / 2 - (clientY - bounds.top)
+      ) / Math.max(1, bounds.height / 2);
+      const range = Number(map3d.range || currentRange);
+      const heading = Number(map3d.heading || 0) * Math.PI / 180;
+      const tilt = Math.max(
+        0,
+        Math.min(80, Number(map3d.tilt || 0))
+      ) * Math.PI / 180;
+      const fov = Math.max(
+        20,
+        Math.min(80, Number(map3d.fov || 45))
+      ) * Math.PI / 180;
+      const tangent = Math.tan(fov / 2);
+      const aspect = bounds.width / Math.max(1, bounds.height);
+
+      const sinHeading = Math.sin(heading);
+      const cosHeading = Math.cos(heading);
+      const sinTilt = Math.sin(tilt);
+      const cosTilt = Math.cos(tilt);
+      const forward = {
+        east: sinHeading * sinTilt,
+        north: cosHeading * sinTilt,
+        up: -cosTilt
+      };
+      const right = {
+        east: cosHeading,
+        north: -sinHeading,
+        up: 0
+      };
+      const screenUp = {
+        east: sinHeading * cosTilt,
+        north: cosHeading * cosTilt,
+        up: sinTilt
+      };
+      const camera = {
+        east: -range * forward.east,
+        north: -range * forward.north,
+        up: -range * forward.up
+      };
+      const ray = {
+        east: forward.east +
+          normalizedX * tangent * aspect * right.east +
+          normalizedY * tangent * screenUp.east,
+        north: forward.north +
+          normalizedX * tangent * aspect * right.north +
+          normalizedY * tangent * screenUp.north,
+        up: forward.up + normalizedY * tangent * screenUp.up
+      };
+      const rayDistance = ray.up < -0.001
+        ? -camera.up / ray.up
+        : range;
+      const eastM = camera.east + rayDistance * ray.east;
+      const northM = camera.north + rayDistance * ray.north;
+      const latitude = Number(center.lat) + northM / 111320;
+      const longitudeScale = Math.max(
+        10000,
+        111320 * Math.cos(Number(center.lat) * Math.PI / 180)
+      );
+      const longitude = Number(center.lng) + eastM / longitudeScale;
+      return { latitude, longitude, altitude: 600 };
+    }
+
+    function reportMapContextMenu(event) {
+      if (mapMode !== "FLY" || !bridge || !map3d) return;
+      const bounds = map3d.getBoundingClientRect();
+      if (
+        event.clientX < bounds.left || event.clientX > bounds.right ||
+        event.clientY < bounds.top || event.clientY > bounds.bottom
+      ) return;
+      event.preventDefault();
+      const clientX = event.clientX;
+      const clientY = event.clientY;
+      setTimeout(() => {
+        if (mapContextHandled) {
+          mapContextHandled = false;
+          rightPointerPending = false;
+          return;
+        }
+        const position = projectedMapPosition(clientX, clientY, bounds);
+        bridge.reportMapRightClick(
+          position.latitude,
+          position.longitude,
+          position.altitude
+        );
+        rightPointerPending = false;
+      }, 25);
+    }
+
+    document.addEventListener("pointerdown", event => {
+      rightPointerPending = Number(event.button) === 2;
+      if (rightPointerPending) mapContextHandled = false;
+    }, true);
+    document.addEventListener("contextmenu", reportMapContextMenu, true);
+
+    async function initMap() {
+      const libraries = await Promise.all([
+        google.maps.importLibrary("maps3d"),
+        google.maps.importLibrary("marker")
+      ]);
+      maps3d = libraries[0];
+      PinElementClass = libraries[1].PinElement;
+      map3d = new maps3d.Map3DElement({
+        center: { lat: 37.3422, lng: 127.9202, altitude: 250 },
+        range: currentRange,
+        tilt: 0,
+        heading: 0,
+        mode: "HYBRID",
+        gestureHandling: "GREEDY"
+      });
+      map3d.addEventListener("gmp-click", event => {
+        if (!bridge || !event.position) return;
+        const position = event.position;
+        if (
+          mapMode === "FLY" &&
+          (rightPointerPending || Number(event.domEvent?.button) === 2)
+        ) {
+          mapContextHandled = true;
+          rightPointerPending = false;
+          bridge.reportMapRightClick(
+            Number(position.lat),
+            Number(position.lng),
+            Number(position.altitude || 0)
+          );
+          return;
+        }
+        if (mapMode !== "PLAN") return;
+        bridge.reportMapClick(
+          Number(position.lat),
+          Number(position.lng),
+          Number(position.altitude || 0)
+        );
+      });
+      map3d.addEventListener("gmp-error", () => {
+        document.getElementById("status").textContent = "GOOGLE 3D MAP ERROR";
+        if (bridge) bridge.reportStatus("Google 3D map initialization error.");
+      });
+      document.getElementById("mapHost").append(map3d);
+      document.getElementById("status").textContent = "PLAN // GOOGLE 3D HYBRID ONLINE";
+      setRange(currentRange);
+      if (bridge) bridge.reportStatus("Google 3D Hybrid map loaded.");
+      schedulePlanRender(latestPlan);
+    }
+
+    connectBridge();
+
+    (g => {
+      let h, a, k, p = "The Google Maps JavaScript API", c = "google",
+          l = "importLibrary", q = "__ib__", m = document, b = window;
+      b = b[c] || (b[c] = {});
+      const d = b.maps || (b.maps = {}), r = new Set(), e = new URLSearchParams(),
+            u = () => h || (h = new Promise(async (f, n) => {
+              await (a = m.createElement("script"));
+              e.set("libraries", [...r] + "");
+              for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]);
+              e.set("callback", c + ".maps." + q);
+              a.src = `https://maps.${c}apis.com/maps/api/js?` + e;
+              d[q] = f;
+              a.onerror = () => h = n(Error(p + " could not load."));
+              m.head.append(a);
+            }));
+      d[l] ? console.warn(p + " only loads once. Ignoring:", g)
+           : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n));
+    })({ key: __API_KEY_JSON__, v: "weekly", language: "ko", region: "KR" });
+
+    initMap().catch(error => {
+      document.getElementById("status").textContent = "GOOGLE 3D LOAD FAILED";
+      if (bridge) bridge.reportStatus(String(error));
+    });
+  </script>
+</body>
+</html>

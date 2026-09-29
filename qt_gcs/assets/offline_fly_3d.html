@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    html, body, canvas { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #07100d; }
+    body { font-family: Consolas, "Malgun Gothic", monospace; }
+    #status, #grid {
+      position: fixed; z-index: 4; color: #f0bd42; background: rgba(5,12,8,.9);
+      border: 1px solid #526455; padding: 8px 11px; font-size: 12px;
+    }
+    #status { left: 14px; top: 14px; }
+    #grid { right: 14px; top: 14px; }
+  </style>
+  <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+</head>
+<body>
+  <canvas id="map"></canvas>
+  <div id="status">OFFLINE TACTICAL PREVIEW // API KEY NOT SET</div>
+  <div id="grid">격자 001.6 km</div>
+  <script>
+    const canvas = document.getElementById("map");
+    const context = canvas.getContext("2d");
+    let bridge = null;
+    let state = {};
+
+    function connectBridge() {
+      if (!window.qt || !qt.webChannelTransport) {
+        setTimeout(connectBridge, 100);
+        return;
+      }
+      new QWebChannel(qt.webChannelTransport, channel => {
+        bridge = channel.objects.bridge;
+        bridge.stateChanged.connect(payload => {
+          try { state = JSON.parse(payload || "{}"); render(); } catch (_) {}
+        });
+        bridge.requestInitialState();
+      });
+    }
+
+    function sizeCanvas() {
+      const ratio = window.devicePixelRatio || 1;
+      canvas.width = Math.max(1, innerWidth * ratio);
+      canvas.height = Math.max(1, innerHeight * ratio);
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      render();
+    }
+
+    function center() {
+      const vehicle = state.vehicle || {};
+      return [Number(vehicle.latitude || 37.3422), Number(vehicle.longitude || 127.9202)];
+    }
+
+    function project(item) {
+      const [lat, lon] = center();
+      const scale = Math.min(innerWidth, innerHeight) * 26;
+      return [
+        innerWidth / 2 + (Number(item.longitude) - lon) * scale,
+        innerHeight / 2 - (Number(item.latitude) - lat) * scale
+      ];
+    }
+
+    function symbol(item, label, color, diamond = false) {
+      const [x, y] = project(item);
+      context.strokeStyle = color;
+      context.fillStyle = "rgba(5,12,8,.8)";
+      context.lineWidth = 2;
+      context.beginPath();
+      if (diamond) {
+        context.moveTo(x, y - 10); context.lineTo(x + 10, y);
+        context.lineTo(x, y + 10); context.lineTo(x - 10, y); context.closePath();
+      } else {
+        context.rect(x - 9, y - 9, 18, 18);
+      }
+      context.fill(); context.stroke();
+      context.fillStyle = color;
+      context.font = "bold 11px Consolas";
+      context.fillText(label, x + 14, y + 4);
+    }
+
+    function render() {
+      context.clearRect(0, 0, innerWidth, innerHeight);
+      context.fillStyle = "#07100d";
+      context.fillRect(0, 0, innerWidth, innerHeight);
+      context.strokeStyle = "#1b3123";
+      context.lineWidth = 1;
+      for (let x = innerWidth / 2 % 80; x < innerWidth; x += 80) {
+        context.beginPath(); context.moveTo(x, 0); context.lineTo(x, innerHeight); context.stroke();
+      }
+      for (let y = innerHeight / 2 % 80; y < innerHeight; y += 80) {
+        context.beginPath(); context.moveTo(0, y); context.lineTo(innerWidth, y); context.stroke();
+      }
+
+      const plan = state.plan || {};
+      for (const zone of (plan.zones || [])) {
+        const points = (zone.vertices || []).map(project);
+        if (points.length < 3) continue;
+        context.beginPath();
+        context.moveTo(points[0][0], points[0][1]);
+        for (const point of points.slice(1)) context.lineTo(point[0], point[1]);
+        context.closePath();
+        context.fillStyle = "rgba(55,220,100,.15)";
+        context.strokeStyle = "#55e77a";
+        context.fill(); context.stroke();
+      }
+      const corridor = (plan.ingress_corridor || []).map(project);
+      if (corridor.length >= 3) {
+        context.beginPath();
+        context.moveTo(corridor[0][0], corridor[0][1]);
+        for (const point of corridor.slice(1)) context.lineTo(point[0], point[1]);
+        context.closePath();
+        context.fillStyle = "rgba(77,179,255,.10)";
+        context.strokeStyle = "rgba(77,179,255,.55)";
+        context.fill(); context.stroke();
+      }
+      for (const site of (plan.sites || [])) symbol(site, site.code, "#55d97b");
+      const mission = (plan.mission || state.mission || {});
+      const rp = mission.rally_predicted_subject;
+      if (rp && rp.latitude != null && rp.longitude != null) {
+        symbol({latitude: Number(rp.latitude), longitude: Number(rp.longitude)}, "TP", "#ffd34f", true);
+      }
+      for (const point of (plan.waypoints || [])) symbol(point, point.code, "#e7c35d");
+      if (plan.return_point) symbol(plan.return_point, "RTB", "#58c7ff");
+      if (state.vehicle) symbol(state.vehicle, state.vehicle.code, "#4db3ff");
+      for (const subject of (state.subjects || [])) {
+        symbol(
+          subject, subject.code,
+          subject.selected ? "#ffbf38" : "#ff534b",
+          true
+        );
+      }
+      var statusParts = ["OFFLINE TACTICAL"];
+      var phase = (state.vehicle || {}).flight_phase || state.flight_phase;
+      if (phase) statusParts.push(phase);
+      if (state.spx_pd != null && Number.isFinite(state.spx_pd)) {
+        statusParts.push("SPX PD " + (state.spx_pd * 100).toFixed(1) + "%");
+      }
+      document.getElementById("status").textContent = statusParts.join(" // ");
+    }
+
+    window.addEventListener("resize", sizeCanvas);
+    canvas.addEventListener("dblclick", event => {
+      let nearest = null;
+      let distance = 26;
+      for (const subject of (state.subjects || [])) {
+        const [x, y] = project(subject);
+        const candidate = Math.hypot(event.clientX - x, event.clientY - y);
+        if (candidate < distance) { distance = candidate; nearest = subject; }
+      }
+      if (nearest && bridge) bridge.reportSubjectSelected(Number(nearest.track_id));
+    });
+    connectBridge();
+    sizeCanvas();
+  </script>
+</body>
+</html>

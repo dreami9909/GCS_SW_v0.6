@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root { --green: #49dc70; --amber: #efb334; --cyan: #4cb7e8; }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #050b08; }
+    body { font-family: Consolas, "Malgun Gothic", monospace; color: #b8c8ba; }
+    #viewport {
+      position: absolute; inset: 0; perspective: 900px; overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 38%, rgba(35, 73, 48, .65), transparent 50%),
+        linear-gradient(#08120d, #020503);
+    }
+    #terrain {
+      position: absolute; left: -12%; top: -28%; width: 124%; height: 150%;
+      transform: rotateX(0deg) rotateZ(0deg); transform-origin: center center;
+      background-color: #0c1b12;
+      background-image:
+        linear-gradient(rgba(72, 129, 83, .43) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(72, 129, 83, .43) 1px, transparent 1px),
+        linear-gradient(rgba(41, 71, 48, .5) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(41, 71, 48, .5) 1px, transparent 1px);
+      background-size: 80px 80px, 80px 80px, 20px 20px, 20px 20px;
+      border: 1px solid #4a6c51;
+      box-shadow: 0 0 90px rgba(47, 131, 67, .28);
+    }
+    #terrain::after {
+      content: ""; position: absolute; inset: 0;
+      background:
+        linear-gradient(25deg, transparent 45%, rgba(181, 163, 92, .25) 46%, rgba(181, 163, 92, .25) 48%, transparent 49%),
+        radial-gradient(ellipse at 24% 55%, rgba(47, 93, 61, .75), transparent 19%),
+        radial-gradient(ellipse at 68% 32%, rgba(50, 99, 66, .7), transparent 16%);
+    }
+    #shapes, #markers { position: absolute; inset: 0; width: 100%; height: 100%; }
+    #shapes { pointer-events: none; }
+    #markers { pointer-events: none; }
+    .marker {
+      position: absolute; transform: translate(-50%, -100%); min-width: 58px;
+      color: white; text-align: center; font-size: 10px; font-weight: 700;
+      filter: drop-shadow(0 2px 3px #000); pointer-events: auto; cursor: pointer;
+    }
+    .marker .stem { width: 2px; height: 38px; background: currentColor; margin: 0 auto; opacity: .75; }
+    .marker .box { border: 2px solid currentColor; background: rgba(4, 10, 7, .92); padding: 4px 6px; }
+    .marker.GCS, .marker.RETURN { color: var(--cyan); }
+    .marker.RDR, .marker.SAFE { color: var(--green); }
+    .marker.LC, .marker.WAYPOINT { color: var(--amber); }
+    .marker.UAV { color: #4db3ff; }
+    .marker.ACTIVE { color: #9cff00; }
+    .marker.SUBJECT { color: #ff554c; }
+    .marker.SELECTED { color: #ffbf38; }
+    #status, #camera {
+      position: fixed; z-index: 10; background: rgba(4, 10, 7, .91);
+      border: 1px solid #45604b; padding: 8px 11px; font-size: 11px;
+    }
+    #status { left: 14px; top: 14px; color: var(--amber); display: none; }
+    #camera { right: 14px; top: 14px; color: #7eac88; text-align: right; }
+    #scanlines {
+      position: fixed; inset: 0; pointer-events: none; opacity: .13;
+      background: repeating-linear-gradient(0deg, transparent, transparent 3px, #8bffa5 4px);
+    }
+  </style>
+  <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+</head>
+<body>
+  <div id="viewport">
+    <div id="terrain"></div>
+    <svg id="shapes" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+    <div id="markers"></div>
+  </div>
+  <div id="status">OFFLINE 3D PREVIEW // GOOGLE_MAPS_API_KEY REQUIRED</div>
+  <div id="camera">TILT 0.0°<br>HDG 0.0°<br>RANGE 4.2 KM</div>
+  <div id="scanlines"></div>
+  <script>
+    let center = { lat: 37.3422, lng: 127.9202, altitude: 250 };
+    const svgNs = "http://www.w3.org/2000/svg";
+    let bridge = null;
+    let latestPlan = {};
+    let latestFlyPlan = {};
+    let latestFlyState = {};
+    let mapMode = "PLAN";
+    let planSelectedVehicleId = 0;
+    let renderPending = false;
+    let tacticalRangeM = 55000;
+    const vehicleColors = {
+      1: "#43b8ff",
+      2: "#65d96f",
+      3: "#f3b52d",
+      4: "#b78cff",
+      5: "#ff884d",
+      6: "#42d4c5"
+    };
+
+    function vehicleColor(vehicleId) {
+      return vehicleColors[Number(vehicleId)] || "#4db3ff";
+    }
+
+    function withAlpha(color, alpha) {
+      const value = String(color).replace("#", "");
+      if (!/^[0-9a-fA-F]{6}$/.test(value)) return color;
+      const red = parseInt(value.slice(0, 2), 16);
+      const green = parseInt(value.slice(2, 4), 16);
+      const blue = parseInt(value.slice(4, 6), 16);
+      return `rgba(${red},${green},${blue},${alpha})`;
+    }
+
+    function toScreen(point) {
+      if (mapMode === "FLY") {
+        const meanLatitude = (Number(point.latitude) + center.lat) / 2;
+        const northM =
+          (Number(point.latitude) - center.lat) * 111320;
+        const eastM =
+          (Number(point.longitude) - center.lng) * 111320
+          * Math.cos(meanLatitude * Math.PI / 180);
+        return {
+          x: 50 + eastM / tacticalRangeM * 46,
+          y: 50 - northM / tacticalRangeM * 46
+        };
+      }
+      return {
+        x: 50 + (Number(point.longitude) - center.lng) * 3200,
+        y: 54 - (Number(point.latitude) - center.lat) * 2700
+      };
+    }
+
+    function addShape(tag, attributes) {
+      const element = document.createElementNS(svgNs, tag);
+      for (const [key, value] of Object.entries(attributes)) {
+        element.setAttribute(key, value);
+      }
+      document.getElementById("shapes").appendChild(element);
+      return element;
+    }
+
+    function addMarker(
+      item, kind, text, opacity = 1, selectable = true, color = null,
+      contextKey = null
+    ) {
+      const position = toScreen(item);
+      const marker = document.createElement("div");
+      marker.className = `marker ${kind}`;
+      marker.style.left = `${position.x}%`;
+      marker.style.top = `${position.y}%`;
+      marker.style.opacity = String(opacity);
+      if (color) marker.style.color = color;
+      marker.innerHTML =
+        `<div class="box">${text}</div><div class="stem"></div>`;
+      if (selectable) {
+        marker.addEventListener("click", event => {
+          event.stopPropagation();
+          if (bridge) bridge.reportFeatureSelected(String(item.code));
+        });
+      }
+      if (contextKey) {
+        marker.addEventListener("contextmenu", event => {
+          if (mapMode !== "FLY" || !bridge) return;
+          event.preventDefault();
+          event.stopPropagation();
+          bridge.reportFeatureRightClick(
+            contextKey,
+            Number(item.latitude),
+            Number(item.longitude),
+            Number(item.altitude_m || 0)
+          );
+        });
+      }
+      document.getElementById("markers").appendChild(marker);
+    }
+
+    function scheduleRender(payload) {
+      latestPlan = JSON.parse(payload || "{}");
+      if (renderPending) return;
+      renderPending = true;
+      requestAnimationFrame(() => {
+        renderPending = false;
+        renderAll();
+      });
+    }
+
+    function renderAll() {
+      renderPlan(
+        mapMode === "FLY"
+          ? latestFlyPlan
+          : latestPlan,
+        mapMode === "FLY"
+          ? Number(latestFlyState.selected_vehicle_id || 0)
+          : planSelectedVehicleId,
+        mapMode === "FLY"
+          ? (latestFlyState.vehicles || [])
+          : []
+      );
+      if (mapMode === "FLY") renderTactical(latestFlyState);
+      var pdLabel = "";
+      if (mapMode === "FLY" && latestFlyState.spx_pd != null && Number.isFinite(latestFlyState.spx_pd)) {
+        pdLabel = " // SPX PD " + (latestFlyState.spx_pd * 100).toFixed(1) + "%";
+      }
+      document.getElementById("status").textContent = mapMode === "FLY"
+        ? "MISSION MAP // OFFLINE TACTICAL PREVIEW" + pdLabel
+        : "PLAN // OFFLINE 3D PREVIEW";
+    }
+
+    function visibleWaypoints(plan, selectedVehicleId = null) {
+      const activeWaypoints = plan.waypoints || [];
+      if (selectedVehicleId === null) {
+        return activeWaypoints;
+      }
+      const routes = Array.isArray(plan.vehicle_routes)
+        ? plan.vehicle_routes
+        : [];
+      const selectedId = Number(selectedVehicleId || 0);
+      const visibleRoutes = selectedId > 0
+        ? routes.filter(route => Number(route.vehicle_id) === selectedId)
+        : routes;
+      const waypoints = visibleRoutes.flatMap(route =>
+        (route.waypoints || []).map(waypoint => ({
+          ...waypoint,
+          vehicle_id: Number(route.vehicle_id),
+          vehicle_code: route.vehicle_code || `UAV-${String(route.vehicle_id).padStart(2, "0")}`
+        }))
+      );
+      if (selectedId > 0) return waypoints;
+
+      const grouped = new Map();
+      for (const waypoint of waypoints) {
+        const key = [
+          waypoint.code,
+          Number(waypoint.latitude).toFixed(7),
+          Number(waypoint.longitude).toFixed(7),
+          Number(waypoint.altitude_m || 0).toFixed(1)
+        ].join(":");
+        const group = grouped.get(key) || [];
+        group.push(waypoint);
+        grouped.set(key, group);
+      }
+      const result = [];
+      for (const group of grouped.values()) {
+        if (group.length === visibleRoutes.length && visibleRoutes.length > 1) {
+          result.push({
+            ...group[0],
+            vehicle_code: "UAV-01~06",
+            common_waypoint: true
+          });
+        } else {
+          result.push(...group);
+        }
+      }
+      return result;
+    }
+
+    function renderPlan(plan, selectedVehicleId = null, vehicles = []) {
+      const markerHost = document.getElementById("markers");
+      const shapeHost = document.getElementById("shapes");
+      markerHost.replaceChildren();
+      shapeHost.replaceChildren();
+
+      const sites = plan.sites || [];
+      const initialSubjects = plan.initial_subjects || [];
+      const dynamicVehicleIds = new Set(
+        (vehicles || [])
+          .filter(vehicle =>
+            (vehicle.approach_route || []).length > 0 ||
+            (vehicle.runtime_route || []).length > 0
+          )
+          .map(vehicle => Number(String(vehicle.code || "0").split("-").pop()))
+      );
+      const waypoints = visibleWaypoints(plan, selectedVehicleId).filter(
+        waypoint => !dynamicVehicleIds.has(Number(waypoint.vehicle_id || 0))
+      );
+      const returnPoint = plan.return_point || null;
+      const zones = plan.zones || [];
+      const draft = plan.draft_zone || { zone_type: null, vertices: [] };
+
+      for (const zone of zones) {
+        const points = (zone.vertices || [])
+          .map(toScreen)
+          .map(point => `${point.x},${point.y}`)
+          .join(" ");
+        addShape("polygon", {
+          points,
+          fill: "rgba(73,220,112,.2)",
+          stroke: "#49dc70",
+          "stroke-width": "0.25"
+        });
+      }
+      const corridor = plan.ingress_corridor || [];
+      if (corridor.length >= 3) {
+        const cPoints = corridor
+          .map(toScreen)
+          .map(point => `${point.x},${point.y}`)
+          .join(" ");
+        addShape("polygon", {
+          points: cPoints,
+          fill: "rgba(77,179,255,.10)",
+          stroke: "rgba(77,179,255,.55)",
+          "stroke-width": "0.20"
+        });
+      }
+
+      if (mapMode === "PLAN") {
+        const selectedId = Number(selectedVehicleId || 0);
+        const launcher = sites.find(site => site.code === "LC") ||
+          sites.find(site => site.code === "GCS");
+        for (const vehicleRoute of (plan.vehicle_routes || [])) {
+          const vehicleId = Number(vehicleRoute.vehicle_id);
+          if (selectedId > 0 && selectedId !== vehicleId) continue;
+          const baseColor = vehicleColor(vehicleId);
+          const routePoints = [
+            ...(launcher ? [launcher] : []),
+            ...(vehicleRoute.waypoints || [])
+          ];
+          if (routePoints.length < 2) continue;
+          addShape("polyline", {
+            points: routePoints
+              .map(toScreen)
+              .map(point => `${point.x},${point.y}`)
+              .join(" "),
+            fill: "none",
+            stroke: withAlpha(
+              baseColor,
+              selectedId === 0 ? .68 : .96
+            ),
+            "stroke-width": selectedId === 0 ? "0.22" : "0.30"
+          });
+        }
+      }
+
+      if (mapMode === "FLY") {
+        const launcher = sites.find(site => site.code === "LC");
+        const selectedId = Number(selectedVehicleId || 0);
+        const vehicleById = new Map(
+          (vehicles || []).map(vehicle => [
+            Number(String(vehicle.code || "0").split("-").pop()),
+            vehicle
+          ])
+        );
+        for (const vehicleRoute of (plan.vehicle_routes || [])) {
+          const vehicleId = Number(vehicleRoute.vehicle_id);
+          const focused = selectedId > 0 && selectedId === vehicleId;
+          const muted = selectedId > 0 && !focused;
+          const baseColor = vehicleColor(vehicleId);
+          const vehicle = vehicleById.get(vehicleId);
+          const approachWaypoints = vehicle?.approach_route || [];
+          const runtimeWaypoints = vehicle?.runtime_route || [];
+          const approach = approachWaypoints.length > 0;
+          const waypoints = approach
+            ? approachWaypoints
+            : (
+                runtimeWaypoints.length > 0
+                  ? runtimeWaypoints
+                  : (vehicleRoute.waypoints || [])
+              );
+          const launched = Boolean(vehicle?.mission_launched);
+          const completed = launched && !approach
+            ? Math.max(0, Number(
+                vehicle.completed_route_segment_count || 0
+              ))
+            : 0;
+          const routePoints = launched
+            ? (
+                completed < waypoints.length
+                  ? [vehicle, ...waypoints.slice(completed)]
+                  : []
+              )
+            : [
+                ...(launcher ? [launcher] : []),
+                ...waypoints
+              ];
+          if (routePoints.length < 2) continue;
+          addShape("polyline", {
+            points: routePoints
+              .map(toScreen)
+              .map(point => `${point.x},${point.y}`)
+              .join(" "),
+            fill: "none",
+            stroke: withAlpha(
+              baseColor,
+              plan.pending_edit
+                ? (muted ? .08 : (focused ? .48 : .32))
+                : (muted ? .18 : (focused ? .92 : .66))
+            ),
+            "stroke-width": focused ? "0.34" : "0.24",
+            "stroke-dasharray": "0.7 0.65"
+          });
+        }
+      }
+
+      if ((draft.vertices || []).length >= 2) {
+        addShape("polyline", {
+          points: draft.vertices.map(toScreen).map(point => `${point.x},${point.y}`).join(" "),
+          fill: "none",
+          stroke: "#49dc70",
+          "stroke-width": "0.3",
+          "stroke-dasharray": "1 0.6"
+        });
+      }
+
+      for (const site of sites) {
+        addMarker(site, site.code, `${site.code}<br>${Number(site.altitude_m).toFixed(0)}M`);
+      }
+      const rp = (plan.mission || {}).rally_predicted_subject;
+      if (rp && rp.latitude != null && rp.longitude != null) {
+        addMarker(
+          {latitude: Number(rp.latitude), longitude: Number(rp.longitude)},
+          "TP",
+          "TP // 공통 집결점",
+          1,
+          false,
+          "#ffd34f"
+        );
+      }
+      if (mapMode === "PLAN") {
+        for (const subj of initialSubjects) {
+          addMarker(
+            {...subj, code: `SAR-PSN-${Number(subj.track_id)}`},
+            "SUBJECT",
+            `TARGET / ${(subj.subject_type || "TARGET").replace(/MISSING_PERSON\w*/g, "TARGET")}<br>` +
+              `PSN-${Number(subj.track_id)} / ` +
+              `${(Number(subj.speed_mps || 0) * 3.6).toFixed(0)}KM/H`,
+            1,
+            false,
+            "#ff554c"
+          );
+        }
+      }
+      for (const waypoint of waypoints) {
+        const vehicleCode = waypoint.vehicle_code || plan.active_vehicle_code || "SAR";
+        const waypointVehicleId = Number(
+          waypoint.vehicle_id || String(vehicleCode).split("-").pop()
+        );
+        const waypointColor = waypoint.common_waypoint
+          ? "#efb334"
+          : vehicleColor(waypointVehicleId);
+        const waypointLabel = waypoint.common_waypoint
+          ? `${vehicleCode} / ${waypoint.code} / 공통`
+          : (
+              `${vehicleCode} / ${waypoint.code}` +
+              (waypoint.pending_preview ? " / 수정 대기" : "")
+            );
+        const contextOwner = waypoint.common_waypoint
+          ? "FLEET"
+          : String(waypointVehicleId);
+        addMarker(
+          waypoint,
+          "WAYPOINT",
+          `${waypointLabel}<br>${Number(waypoint.altitude_m).toFixed(0)}M`,
+          waypoint.pending_preview ? .30 : 1,
+          !(mapMode === "PLAN" && Number(selectedVehicleId || 0) === 0),
+          waypointColor,
+          `${contextOwner}:${waypoint.code}`
+        );
+      }
+      (draft.vertices || []).forEach((vertex, index) => {
+        addMarker(
+          {...vertex, code: `DRAFT-${index + 1}`},
+          draft.zone_type || "SAFE",
+          `V${index + 1}`
+        );
+      });
+    }
+
+    function addHeadingLine(item, color) {
+      const start = toScreen(item);
+      const heading = Number(item.heading_deg || 0) * Math.PI / 180;
+      const length = 4.5;
+      addShape("line", {
+        x1: start.x,
+        y1: start.y,
+        x2: start.x + Math.sin(heading) * length,
+        y2: start.y - Math.cos(heading) * length,
+        stroke: color,
+        "stroke-width": "0.32"
+      });
+    }
+
+    function renderTactical(state) {
+      const vehicles = state.vehicles || (state.vehicle ? [state.vehicle] : []);
+      const vehicle = state.vehicle;
+      const selectedVehicleId = Number(state.selected_vehicle_id || 0);
+      const planning = state.planning || {};
+      const vehicleById = new Map(
+        vehicles.map(vehicle => [
+          Number(String(vehicle.code || "0").split("-").pop()),
+          vehicle
+        ])
+      );
+      const queuedIds = new Set(
+        (planning.queued_vehicle_ids || []).map(Number)
+      );
+      for (const candidate of (planning.route_candidates || [])) {
+        const vehicleId = Number(candidate.vehicle_id || 0);
+        const vehicle = vehicleById.get(vehicleId);
+        const waypoints = candidate.waypoints || [];
+        if (!vehicle || waypoints.length === 0) continue;
+        const focused = selectedVehicleId === 0 || selectedVehicleId === vehicleId;
+        const queued = queuedIds.has(vehicleId);
+        const color = vehicleColor(vehicleId);
+        addShape("polyline", {
+          points: [vehicle, ...waypoints]
+            .map(toScreen)
+            .map(point => `${point.x},${point.y}`)
+            .join(" "),
+          fill: "none",
+          stroke: withAlpha(color, focused ? (queued ? .82 : .38) : .10),
+          "stroke-width": queued ? ".34" : ".20"
+        });
+        for (const waypoint of waypoints) {
+          const point = toScreen(waypoint);
+          addShape("circle", {
+            cx: point.x,
+            cy: point.y,
+            r: queued ? ".42" : ".28",
+            fill: withAlpha(color, focused ? (queued ? .85 : .48) : .12),
+            stroke: "rgba(235,246,235,.82)",
+            "stroke-width": ".08"
+          });
+        }
+      }
+      for (const footprint of (planning.footprints || [])) {
+        const point = toScreen(footprint);
+        const radius = Math.max(
+          .18,
+          Number(footprint.radius_m || 5) / tacticalRangeM * 46
+        );
+        const color = vehicleColor(Number(footprint.vehicle_id || 0));
+        addShape("ellipse", {
+          cx: point.x, cy: point.y, rx: radius, ry: radius,
+          fill: withAlpha(color, .10),
+          stroke: withAlpha(color, .72),
+          "stroke-width": "0.16"
+        });
+      }
+      for (const belief of (planning.beliefs || [])) {
+        const point = toScreen(belief);
+        const radiusX = Math.max(
+          .25,
+          Number(belief.uncertainty_east_95_m || 20) /
+            tacticalRangeM * 46
+        );
+        const radiusY = Math.max(
+          .25,
+          Number(belief.uncertainty_north_95_m || 20) /
+            tacticalRangeM * 46
+        );
+        addShape("ellipse", {
+          cx: point.x, cy: point.y, rx: radiusX, ry: radiusY,
+          fill: "rgba(255,191,56,.055)",
+          stroke: "rgba(255,191,56,.62)",
+          "stroke-width": "0.16",
+          "stroke-dasharray": ".6 .45"
+        });
+      }
+      for (const fleetVehicle of vehicles) {
+        const vehicleId = Number(String(fleetVehicle.code).split("-").pop());
+        const active = selectedVehicleId > 0 && selectedVehicleId === vehicleId;
+        const muted = selectedVehicleId > 0 && !active;
+        const baseColor = vehicleColor(vehicleId);
+        const color = muted ? withAlpha(baseColor, .28) : baseColor;
+        addHeadingLine(fleetVehicle, color);
+        addMarker(
+          fleetVehicle,
+          active ? "ACTIVE" : "UAV",
+          `▲ ${fleetVehicle.code}<br>${Number(fleetVehicle.speed_mps).toFixed(1)}M/S / ${fleetVehicle.flight_phase || "STANDBY"}`,
+          muted ? .28 : 1,
+          true,
+          color
+        );
+        const path = fleetVehicle.flight_path || [];
+        if (path.length >= 2) {
+          addShape("polyline", {
+            points: path.map(toScreen).map(point => `${point.x},${point.y}`).join(" "),
+            fill: "none",
+            stroke: withAlpha(
+              baseColor,
+              muted ? .18 : (active ? .88 : .58)
+            ),
+            "stroke-width": active ? "0.30" : "0.20"
+          });
+        }
+      }
+      for (const subject of (state.subjects || [])) {
+        const etaSeconds = Number(subject.eta_s || 0);
+        const etaMinutes = Math.floor(etaSeconds / 60);
+        const etaRemainder = Math.floor(etaSeconds % 60);
+        const color = subject.selected ? "#ffbf38" : "#ff554c";
+        addHeadingLine(subject, color);
+        addMarker(
+          subject,
+          subject.selected ? "SELECTED" : "SUBJECT",
+          `${subject.found ? "✕" : "◇"} ${subject.subject_type || "PERSON"}-${subject.country || "--"} ${subject.code}<br>${(Number(subject.distance_m || 0) / 1000).toFixed(1)}KM / ETA ${String(etaMinutes).padStart(2, "0")}:${String(etaRemainder).padStart(2, "0")}`
+        );
+      }
+      const loiter = state.guidance_orbit;
+      if (loiter) {
+        const loiterPoint = toScreen(loiter);
+        const orbitRadius = Math.max(
+          .5,
+          Number(loiter.radius_m || 1200) / tacticalRangeM * 46
+        );
+        addShape("ellipse", {
+          cx: loiterPoint.x,
+          cy: loiterPoint.y,
+          rx: orbitRadius,
+          ry: orbitRadius,
+          fill: "rgba(77,179,255,.06)",
+          stroke: "#4db3ff",
+          "stroke-width": "0.35",
+          "stroke-dasharray": "1.2 .7"
+        });
+        addMarker(
+          loiter,
+          "UAV",
+          `○ 초기접근 선회 ${loiter.waypoint_code || "WP"}<br>R${(Number(loiter.radius_m || 1200) / 1000).toFixed(1)}KM / ${Number(loiter.speed_mps || 100).toFixed(0)}M/S`
+        );
+      }
+      const emergencyReturn = state.emergency_return;
+      const mitlReturn = state.mitl_return;
+      if ((emergencyReturn || mitlReturn) && vehicle) {
+        const returnPath = [vehicle];
+        if (mitlReturn?.via_waypoint) {
+          returnPath.push(mitlReturn.via_waypoint);
+        }
+        returnPath.push(mitlReturn?.safe_zone || emergencyReturn);
+        addShape("polyline", {
+          points: returnPath
+            .map(toScreen)
+            .map(point => `${point.x},${point.y}`)
+            .join(" "),
+          fill: "none",
+          stroke: "#ff9d32",
+          "stroke-width": "0.55",
+          "stroke-dasharray": "1.5 .8"
+        });
+      }
+      if (state.shutdown_marker) {
+        addMarker(
+          state.shutdown_marker,
+          "SUBJECT",
+          "✕<br>SHUT DOWN"
+        );
+      }
+    }
+
+    window.setFlyState = payload => {
+      try {
+        latestFlyState = JSON.parse(payload || "{}");
+        if (
+          latestFlyState.plan &&
+          Object.keys(latestFlyState.plan).length > 0
+        ) {
+          latestFlyPlan = latestFlyState.plan;
+        }
+      } catch (_) {
+        latestFlyState = {};
+      }
+      if (mapMode === "FLY") renderAll();
+    };
+
+    window.setFlyPlan = payload => {
+      try {
+        latestFlyPlan = typeof payload === "string"
+          ? JSON.parse(payload || "{}")
+          : (payload || {});
+      } catch (_) {
+        latestFlyPlan = {};
+      }
+      if (mapMode === "FLY") renderAll();
+    };
+
+    window.setPlanVehicleSelection = vehicleId => {
+      planSelectedVehicleId = Math.max(0, Math.min(6, Number(vehicleId || 0)));
+      if (mapMode === "PLAN") renderAll();
+    };
+
+    window.setMapMode = mode => {
+      mapMode = mode === "FLY" ? "FLY" : "PLAN";
+      document.getElementById("status").style.display =
+        mapMode === "FLY" ? "block" : "none";
+      renderAll();
+    };
+    document.getElementById("viewport").addEventListener("contextmenu", event => {
+      if (mapMode !== "FLY" || !bridge) return;
+      event.preventDefault();
+      const xPercent = event.clientX / Math.max(1, innerWidth) * 100;
+      const yPercent = event.clientY / Math.max(1, innerHeight) * 100;
+      const eastM = (xPercent - 50) / 46 * tacticalRangeM;
+      const northM = (50 - yPercent) / 46 * tacticalRangeM;
+      const latitude = center.lat + northM / 111320;
+      const scale = Math.max(
+        10000,
+        111320 * Math.cos(center.lat * Math.PI / 180)
+      );
+      const longitude = center.lng + eastM / scale;
+      bridge.reportMapRightClick(latitude, longitude, 600);
+    });
+    window.moveMapCamera = destination => {
+      if (!destination) return false;
+      const latitude = Number(destination.latitude);
+      const longitude = Number(destination.longitude);
+      const altitude = Number(destination.altitude_m || 0);
+      if (![latitude, longitude, altitude].every(Number.isFinite)) return false;
+      center = {lat: latitude, lng: longitude, altitude};
+      document.getElementById("camera").innerHTML =
+        `LAT ${latitude.toFixed(6)}<br>LON ${longitude.toFixed(6)}<br>ALT ${altitude.toFixed(1)} M`;
+      renderAll();
+      return true;
+    };
+
+    function connectBridge() {
+      if (!window.qt || !qt.webChannelTransport) {
+        setTimeout(connectBridge, 100);
+        return;
+      }
+      new QWebChannel(qt.webChannelTransport, channel => {
+        bridge = channel.objects.bridge;
+        bridge.planChanged.connect(scheduleRender);
+        bridge.requestInitialState();
+        bridge.reportStatus("Offline 3D preview active. Google API key is not set.");
+      });
+    }
+
+    document.getElementById("viewport").addEventListener("click", event => {
+      if (!bridge || mapMode !== "PLAN") return;
+      const latitude = center.lat + (0.50 - event.clientY / innerHeight) * 0.030;
+      const longitude = center.lng + (event.clientX / innerWidth - 0.50) * 0.040;
+      bridge.reportMapClick(latitude, longitude, 0);
+    });
+    connectBridge();
+  </script>
+</body>
+</html>

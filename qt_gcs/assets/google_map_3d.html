@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    html, body, #mapHost { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #07100d; }
+    body { font-family: Consolas, "Malgun Gothic", monospace; }
+    gmp-map-3d { width: 100%; height: 100%; display: block; }
+    #status {
+      position: fixed; left: 14px; z-index: 20;
+      color: #61ef82; background: rgba(5, 12, 8, .88);
+      border: 1px solid #4b6b52; padding: 8px 11px; font-size: 12px;
+      letter-spacing: .5px; pointer-events: none;
+    }
+    #status { top: 14px; }
+  </style>
+  <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+</head>
+<body>
+  <div id="mapHost"></div>
+  <div id="status">GOOGLE MAPS 3D // INITIALIZING</div>
+  <script>
+    let map3d = null;
+    let bridge = null;
+    let maps3dLibrary = null;
+    let latestPlan = "{}";
+    let renderScheduled = false;
+    const pointMarkers = new Map();
+    const zonePolygons = new Map();
+    const draftMarkers = new Map();
+    let routeLine = null;
+    let draftLine = null;
+    let tpMarker = null;
+
+    const colors = {
+      GCS: "#4db3ff",
+      RDR: "#55e77a",
+      LC: "#ffbd37",
+      WAYPOINT: "#f5c542",
+      RETURN: "#58c7ff",
+      SAFE: "#55e77a",
+      DRAFT: "#ffffff"
+    };
+
+    function positionOf(item, defaultAltitude = 0) {
+      return {
+        lat: Number(item.latitude),
+        lng: Number(item.longitude),
+        altitude: Number(item.altitude_m ?? defaultAltitude)
+      };
+    }
+
+    function connectBridge() {
+      if (!window.qt || !qt.webChannelTransport) {
+        setTimeout(connectBridge, 100);
+        return;
+      }
+      new QWebChannel(qt.webChannelTransport, channel => {
+        bridge = channel.objects.bridge;
+        bridge.planChanged.connect(scheduleRender);
+        bridge.requestInitialState();
+      });
+    }
+
+    function scheduleRender(payload) {
+      latestPlan = payload || "{}";
+      if (!map3d || renderScheduled) return;
+      renderScheduled = true;
+      requestAnimationFrame(() => {
+        renderScheduled = false;
+        renderPlan(latestPlan).catch(error => {
+          document.getElementById("status").textContent = "PLAN RENDER ERROR";
+          if (bridge) bridge.reportStatus(String(error));
+        });
+      });
+    }
+
+    function removeStale(elementMap, desiredIds) {
+      for (const [id, element] of elementMap) {
+        if (!desiredIds.has(id)) {
+          element.remove();
+          elementMap.delete(id);
+        }
+      }
+    }
+
+    function upsertMarker(item, kind, label, collection = pointMarkers) {
+      const id = String(item.code);
+      let marker = collection.get(id);
+      if (!marker) {
+        marker = new maps3dLibrary.Marker3DInteractiveElement({
+          altitudeMode: "RELATIVE_TO_GROUND",
+          extruded: true,
+          sizePreserved: true,
+          title: id
+        });
+        marker.addEventListener("gmp-click", event => {
+          event.stopPropagation();
+          if (bridge) bridge.reportFeatureSelected(id);
+        });
+        map3d.append(marker);
+        collection.set(id, marker);
+      }
+      marker.position = positionOf(item);
+      marker.label = label;
+      marker.title = id;
+      marker.style.setProperty("--gmp-marker-color", colors[kind] || "#ffffff");
+    }
+
+    async function renderPlan(payload) {
+      if (!map3d || !maps3dLibrary) return;
+      const plan = JSON.parse(payload || "{}");
+      const sites = plan.sites || [];
+      const waypoints = plan.waypoints || [];
+      const returnPoint = plan.return_point || null;
+      const zones = plan.zones || [];
+      const draft = plan.draft_zone || { zone_type: null, vertices: [] };
+
+      const pointIds = new Set();
+      for (const site of sites) {
+        pointIds.add(String(site.code));
+        upsertMarker(site, site.code, `${site.code} // ${site.label}`);
+      }
+      const mission = plan.mission || {};
+      const rp = mission.rally_predicted_subject;
+      if (rp && rp.latitude != null && rp.longitude != null) {
+        pointIds.add("TP");
+        if (!tpMarker) {
+          tpMarker = new maps3dLibrary.Marker3DInteractiveElement({
+            altitudeMode: "RELATIVE_TO_GROUND",
+            extruded: true, sizePreserved: true, title: "TP"
+          });
+          tpMarker.addEventListener("gmp-click", event => {
+            event.stopPropagation();
+            if (bridge) bridge.reportFeatureSelected("TP");
+          });
+          map3d.append(tpMarker);
+          pointMarkers.set("TP", tpMarker);
+        }
+        tpMarker.position = positionOf(rp);
+        tpMarker.label = "TP // 공통 집결점";
+        tpMarker.style.setProperty("--gmp-marker-color", "#55ff9a");
+      } else if (tpMarker?.isConnected) {
+        tpMarker.remove();
+        pointMarkers.delete("TP");
+        tpMarker = null;
+      }
+
+      for (const waypoint of waypoints) {
+        pointIds.add(String(waypoint.code));
+        const vehicleCode = waypoint.vehicle_code || plan.active_vehicle_code || "SAR";
+        upsertMarker(
+          waypoint,
+          "WAYPOINT",
+          `${vehicleCode} / WP${waypoint.sequence} // ${Number(waypoint.altitude_m).toFixed(0)}M`
+        );
+      }
+      if (returnPoint) {
+        pointIds.add("RTB");
+        upsertMarker(returnPoint, "RETURN", "RTB // 복귀지점");
+      }
+      removeStale(pointMarkers, pointIds);
+
+      const routePath = [];
+      const gcs = sites.find(site => site.code === "GCS");
+      if (gcs) routePath.push(positionOf(gcs));
+      for (const waypoint of waypoints) routePath.push(positionOf(waypoint));
+      if (returnPoint) routePath.push(positionOf(returnPoint));
+      if (routePath.length >= 2) {
+        if (!routeLine) {
+          routeLine = new maps3dLibrary.Polyline3DElement({
+            altitudeMode: "RELATIVE_TO_GROUND",
+            geodesic: true,
+            strokeColor: "#f5c542",
+            strokeWidth: 4,
+            outerColor: "rgba(0,0,0,.65)",
+            outerWidth: 1,
+            drawsOccludedSegments: true
+          });
+        }
+        if (!routeLine.isConnected) map3d.append(routeLine);
+        routeLine.path = routePath;
+      } else if (routeLine?.isConnected) {
+        routeLine.remove();
+      }
+
+      const zoneIds = new Set();
+      for (const zone of zones) {
+        const id = String(zone.code);
+        zoneIds.add(id);
+        let polygon = zonePolygons.get(id);
+        if (!polygon) {
+          polygon = new maps3dLibrary.Polygon3DInteractiveElement({
+            altitudeMode: "CLAMP_TO_GROUND",
+            geodesic: true,
+            strokeWidth: 3,
+            drawsOccludedSegments: true
+          });
+          polygon.addEventListener("gmp-click", event => {
+            event.stopPropagation();
+            if (bridge) bridge.reportFeatureSelected(id);
+          });
+          map3d.append(polygon);
+          zonePolygons.set(id, polygon);
+        }
+        const zoneColor = colors[zone.zone_type] || "#ffffff";
+        polygon.path = (zone.vertices || []).map(vertex => positionOf(vertex));
+        polygon.strokeColor = zoneColor;
+        polygon.fillColor = "rgba(45, 220, 100, .24)";
+      }
+      removeStale(zonePolygons, zoneIds);
+
+      const draftVertices = draft.vertices || [];
+      const draftIds = new Set();
+      for (let index = 0; index < draftVertices.length; index += 1) {
+        const vertex = {
+          ...draftVertices[index],
+          code: `DRAFT-${index + 1}`
+        };
+        draftIds.add(vertex.code);
+        upsertMarker(
+          vertex,
+          draft.zone_type || "DRAFT",
+          `${draft.zone_type || "ZONE"} V${index + 1}`,
+          draftMarkers
+        );
+      }
+      removeStale(draftMarkers, draftIds);
+      if (draftVertices.length >= 2) {
+        if (!draftLine) {
+          draftLine = new maps3dLibrary.Polyline3DElement({
+            altitudeMode: "CLAMP_TO_GROUND",
+            geodesic: true,
+            strokeColor: "#ffffff",
+            strokeWidth: 3,
+            outerColor: "rgba(0,0,0,.7)",
+            outerWidth: 1,
+            drawsOccludedSegments: true
+          });
+        }
+        if (!draftLine.isConnected) map3d.append(draftLine);
+        draftLine.strokeColor = colors[draft.zone_type] || "#ffffff";
+        draftLine.path = draftVertices.map(vertex => positionOf(vertex));
+      } else if (draftLine?.isConnected) {
+        draftLine.remove();
+      }
+    }
+
+    async function initMap() {
+      maps3dLibrary = await google.maps.importLibrary("maps3d");
+      map3d = new maps3dLibrary.Map3DElement({
+        center: { lat: 37.3422, lng: 127.9202, altitude: 180 },
+        range: 4200,
+        tilt: 0,
+        heading: 0,
+        mode: "HYBRID",
+        gestureHandling: "GREEDY"
+      });
+      map3d.addEventListener("gmp-click", event => {
+        if (!bridge || !event.position) return;
+        const position = event.position;
+        bridge.reportMapClick(
+          Number(position.lat),
+          Number(position.lng),
+          Number(position.altitude || 0)
+        );
+      });
+      map3d.addEventListener("gmp-error", () => {
+        document.getElementById("status").textContent = "GOOGLE 3D MAP ERROR";
+        if (bridge) bridge.reportStatus("Google 3D map initialization error.");
+      });
+      document.getElementById("mapHost").append(map3d);
+      document.getElementById("status").textContent = "GOOGLE 3D HYBRID // ONLINE";
+      if (bridge) bridge.reportStatus("Google 3D Hybrid map loaded.");
+      scheduleRender(latestPlan);
+    }
+
+    connectBridge();
+
+    (g => {
+      let h, a, k, p = "The Google Maps JavaScript API", c = "google",
+          l = "importLibrary", q = "__ib__", m = document, b = window;
+      b = b[c] || (b[c] = {});
+      const d = b.maps || (b.maps = {}), r = new Set(), e = new URLSearchParams(),
+            u = () => h || (h = new Promise(async (f, n) => {
+              await (a = m.createElement("script"));
+              e.set("libraries", [...r] + "");
+              for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]);
+              e.set("callback", c + ".maps." + q);
+              a.src = `https://maps.${c}apis.com/maps/api/js?` + e;
+              d[q] = f;
+              a.onerror = () => h = n(Error(p + " could not load."));
+              m.head.append(a);
+            }));
+      d[l] ? console.warn(p + " only loads once. Ignoring:", g)
+           : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n));
+    })({ key: __API_KEY_JSON__, v: "weekly", language: "ko", region: "KR" });
+
+    initMap().catch(error => {
+      document.getElementById("status").textContent = "GOOGLE 3D LOAD FAILED";
+      if (bridge) bridge.reportStatus(String(error));
+    });
+  </script>
+</body>
+</html>

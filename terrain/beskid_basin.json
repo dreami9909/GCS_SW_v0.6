@@ -1,0 +1,15 @@
+{
+  "resolution_m": 30.0,
+  "radius_m": 8900.0,
+  "contrast": 2.0,
+  "center_latitude": 49.52,
+  "center_longitude": 20.59,
+  "grid_shape": [
+    623,
+    623
+  ],
+  "source": "geotiff:C:/Users/GYEONG/AppData/Local/Temp/dem/cop30_N49E020.tif",
+  "elevation_min_m": 280.0,
+  "elevation_max_m": 1268.1178570609152,
+  "note": "RasterTerrainField.load 호환. elevation_m 은 로컬 ENU(남→북·서→동) 지면고도(MSL). observability=1.0 (지형은 belief 에만)."
+}
